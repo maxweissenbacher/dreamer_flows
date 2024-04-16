@@ -65,7 +65,7 @@ below.
 Install [JAX][jax] and then the other dependencies:
 
 ```sh
-pip install -r dreamer_requirements.txt
+pip install -r requirements.txt
 ```
 
 Simple training script:

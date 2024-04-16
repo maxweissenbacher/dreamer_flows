@@ -73,16 +73,14 @@ def train(agent, env, replay, logger, args):
 
   def train_step(tran, worker):
     # Original line is this...
-    # for _ in range(should_train(step)):b
-    if int(step) % 2048 == 1:
-      for _ in range(1000):
-        with timer.scope('dataset'):
-          batch[0] = next(dataset)
-        outs, state[0], mets = agent.train(batch[0], state[0])
-        metrics.add(mets, prefix='train')
-        if 'priority' in outs:
-          replay.prioritize(outs['key'], outs['priority'])
-        updates.increment()
+    for _ in range(should_train(step)):
+      with timer.scope('dataset'):
+        batch[0] = next(dataset)
+      outs, state[0], mets = agent.train(batch[0], state[0])
+      metrics.add(mets, prefix='train')
+      if 'priority' in outs:
+        replay.prioritize(outs['key'], outs['priority'])
+      updates.increment()
     if should_sync(updates):
       agent.sync()
     if should_log(step):

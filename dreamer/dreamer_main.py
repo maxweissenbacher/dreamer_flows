@@ -5,15 +5,15 @@ def main():
   from dreamerv3 import embodied
   warnings.filterwarnings('ignore', '.*truncated to dtype int32.*')
 
-  warnings.warn('Make sure the correct environment is activated. See dreamer_requirements.txt.', UserWarning)
+  warnings.warn('Make sure the correct environment is activated. See requirements.txt.', UserWarning)
 
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
   config = config.update(dreamerv3.configs['medium'])
   config = config.update({
-      'logdir': '~/logdir/run2',
-      'run.train_ratio': 64,  # unused parameter!
-      'run.log_every': 2048,  # timesteps
+      'logdir': '~/logdir/test_run1',
+      'run.train_ratio': 64,
+      'run.log_every': 30,  # seconds
       'batch_size': 16,
       'jax.prealloc': False,
       'encoder.mlp_keys': 'vector',
@@ -37,12 +37,10 @@ def main():
   import crafter
   import gym
   from embodied.envs import from_gym
-  from environments.windtunnel_env import make_windtunnel_gym_env
 
-  # env = gym.make('CartPole-v1')
+  env = gym.make('CartPole-v1')
   # env = crafter.Env()  # Replace this with your Gym env.
 
-  env = make_windtunnel_gym_env()
 
   env = from_gym.FromGym(env, obs_key='vector')  # Or obs_key='vector'.
   env = dreamerv3.wrap_env(env, config)
