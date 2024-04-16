@@ -5,8 +5,6 @@ def main():
   from dreamerv3 import embodied
   warnings.filterwarnings('ignore', '.*truncated to dtype int32.*')
 
-  warnings.warn('Make sure the correct environment is activated. See requirements.txt.', UserWarning)
-
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
   config = config.update(dreamerv3.configs['medium'])

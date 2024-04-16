@@ -71,7 +71,7 @@ pip install -r requirements.txt
 Simple training script:
 
 ```sh
-python dreamer_main.py
+python main.py
 ```
 
 Flexible training script:
