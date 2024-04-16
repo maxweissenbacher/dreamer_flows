@@ -9,3 +9,4 @@ rich
 ruamel.yaml
 tensorflow
 tensorflow_probability
+matplotlib
