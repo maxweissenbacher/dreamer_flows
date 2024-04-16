@@ -9,7 +9,7 @@ def main():
   config = embodied.Config(dreamerv3.configs['defaults'])
   config = config.update(dreamerv3.configs['medium'])
   config = config.update({
-      'logdir': '~/logdir/test_run1',
+      'logdir': '~/logdir/test_run2',
       'run.train_ratio': 64,
       'run.log_every': 30,  # seconds
       'batch_size': 16,
@@ -36,7 +36,15 @@ def main():
   import gym
   from embodied.envs import from_gym
 
-  env = gym.make('CartPole-v1')
+  from ks.KS_environment import KSenv
+  import numpy as np
+
+  env = KSenv(nu=0.08,
+              actuator_locs=np.array([0.0, np.pi / 4, np.pi / 2, 3 * np.pi / 4]),
+              sensor_locs=np.array([0.0, 1.0, 2.0]),
+              burn_in=0)
+
+  # env = gym.make('CartPole-v1')
   # env = crafter.Env()  # Replace this with your Gym env.
 
 

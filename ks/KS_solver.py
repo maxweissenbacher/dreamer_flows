@@ -45,6 +45,7 @@ class KS:
         for loc in actuator_locs:
             B_list.append(self.normal_pdf_periodic(self.L / (2 * np.pi) * loc))
         self.B = np.stack(B_list, axis=1)
+        self.B = self.B.astype(dtype=np.float32)
 
     def nlterm(self, u, f):
         # compute tendency from nonlinear term. advection + forcing
