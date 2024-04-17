@@ -32,7 +32,7 @@ def main():
       # embodied.logger.MLFlowOutput(logdir.name),
   ])
 
-  import crafter
+#   import crafter
   import gym
   from embodied.envs import from_gym
 
