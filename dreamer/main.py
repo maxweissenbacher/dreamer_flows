@@ -9,7 +9,7 @@ def main():
   config = embodied.Config(dreamerv3.configs['defaults'])
   config = config.update(dreamerv3.configs['medium'])
   config = config.update({
-      'logdir': '~/logdir/test_run2',
+      'logdir': '~/PhD_projects2/dreamer_flows/dreamer/logdir/ks_test_run_posreward_woactuation_reward',
       'run.train_ratio': 64,
       'run.log_every': 30,  # seconds
       'batch_size': 16,
