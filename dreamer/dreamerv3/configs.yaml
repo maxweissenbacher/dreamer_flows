@@ -88,6 +88,7 @@ defaults:
   imag_horizon: 15
   imag_unroll: False
   horizon: 333
+  discount: 0.8
   return_lambda: 0.95
   critic_slowreg: logprob
   slow_critic_update: 1

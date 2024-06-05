@@ -7,4 +7,7 @@ MUJOCO_LOG.TXT
 script*
 logdir/*
 __pycache__
+Cyl_output/*
+results/*
+../cyl/results/*
 ;

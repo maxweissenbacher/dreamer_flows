@@ -62,7 +62,8 @@ class KS:
         # print(action.shape)
 
         if action.dtype != np.float32 or self.B.dtype != np.float32:
-            print(f'Action dtype {action.dtype} || B dtype {self.B.dtype}')
+            pass
+            # print(f'Action dtype {action.dtype} || B dtype {self.B.dtype}')
         f0 = self.B @ action
 
         # semi-implicit third-order runge kutta update.

@@ -39,7 +39,9 @@ def eval_only(agent, env, logger, args):
       if re.match(args.log_keys_mean, key):
         stats[f'mean_{key}'] = ep[key].mean()
       if re.match(args.log_keys_max, key):
-        stats[f'max_{key}'] = ep[key].max(0).mean()
+        stats[f'max_{key}'] = ep[key]# The `max` function in the provided code snippet is used to
+        # find the maximum value along a specified axis.
+        max(0).mean()
     metrics.add(stats, prefix='stats')
 
   driver = embodied.Driver(env)

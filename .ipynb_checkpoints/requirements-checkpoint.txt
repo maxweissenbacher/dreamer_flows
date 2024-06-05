@@ -1,0 +1,10 @@
+cloudpickle
+gym
+jax
+numpy
+optax
+rich
+ruamel.yaml
+tensorflow
+tensorflow_probability
+matplotlib

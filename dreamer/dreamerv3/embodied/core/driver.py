@@ -42,6 +42,7 @@ class Driver:
       step, episode = self._step(policy, step, episode)
 
   def _step(self, policy, step, episode):
+    print("step in driver: ", step)
     assert all(len(x) == len(self._env) for x in self._acts.values())
     acts = {k: v for k, v in self._acts.items() if not k.startswith('log_')}
     obs = self._env.step(acts)

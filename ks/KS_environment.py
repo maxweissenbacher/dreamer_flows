@@ -14,15 +14,15 @@ class KSenv(gym.Env):
             self,
             nu,
             actuator_locs,
-            sensor_locs,
-            burn_in=0,
+            # sensor_locs,
+            burn_in=100,
             target=None,
-            frame_skip=1,
+            frame_skip=20,
             soft_action=False,
             autoreg_weight=0.0,
             actuator_loss_weight=0.0,
             initial_amplitude=1e-2,
-            actuator_scale=0.1,
+            actuator_scale=0.2,
             seed=None,
             device="cpu"):
         # Specify simulation parameters
@@ -34,10 +34,10 @@ class KSenv(gym.Env):
         self.actuator_scale = actuator_scale
         self.burn_in = burn_in
         self.initial_amplitude = initial_amplitude
-        self.observation_inds = [int(x) for x in (self.N / (2 * np.pi)) * sensor_locs]
+        self.observation_inds = np.arange(self.N) #[int(x) for x in (self.N / (2 * np.pi)) * sensor_locs]
         self.num_observations = len(self.observation_inds)
         assert len(self.observation_inds) == len(set(self.observation_inds))
-        self.termination_threshold = 20.  # Terminate the simulation if max(u) exceeds this threshold
+        self.termination_threshold = 20  # Terminate the simulation if max(u) exceeds this threshold
         self.action_low = -1.0  # Minimum allowed actuation (per actuator)
         self.action_high = 1.0  # Maximum allowed actuation (per actuator)
         self.actuator_loss_weight = actuator_loss_weight
@@ -64,12 +64,17 @@ class KSenv(gym.Env):
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.num_observations,))
 
     def step(self, action):
+        # print("step taken")
+        
+        #scale action
+        #action = action*10
+        
         u = self.u  # Solution at previous timestep
         reward_sum = np.zeros([])
         for i in range(self.frame_skip):  # Take frame_skip many steps
             u = self.solver_step(u, action)  # Take a step using the PDE solver
             # reward = - (L2 norm of solution + hyperparameter * L2 norm of action)
-            reward = - np.linalg.norm(u-self.target, axis=-1) - self.actuator_loss_weight * np.linalg.norm(action, axis=-1)
+            reward = -(np.linalg.norm(u-self.target, axis=-1)) #1 - 0.01*((np.linalg.norm(u-self.target, axis=-1)) - self.actuator_loss_weight * np.linalg.norm(action, axis=-1))
             reward_sum += reward
         reward = reward_sum / self.frame_skip  # Compute the average reward over frame_skip steps
         #reward_mean = reward_mean.view(*tensordict.shape, 1)
@@ -92,12 +97,33 @@ class KSenv(gym.Env):
         u = u - u.mean(axis=-1)
         # Burn in
         for _ in range(self.burn_in):
-            u = self.solver_step(u, np.zeros(self.action_size, device=self.device))
+            u = self.solver_step(u, np.zeros(self.action_size))
         # Store the solution in class variable
         self.u = u
         # Compute observation
         observation = u[self.observation_inds]
         return observation
+    
+    def burnin_reset(self):
+        # Initial data drawn from IID normal distributions
+        zrs = np.zeros([self.N])
+        ons = np.ones([self.N])
+        u = np.random.normal(zrs, ons)
+        u = self.initial_amplitude * u
+        u = u - u.mean(axis=-1)
+        
+        u = self.solver_step(u, np.zeros(self.action_size))
+        u_hist = u[np.newaxis,...]
+        # Burn in
+        for _ in range(1,self.burn_in):
+            u = self.solver_step(u, np.zeros(self.action_size))
+            u_hist = np.concatenate((u_hist,u[np.newaxis,...]),axis=0)
+            
+        # Store the solution in class variable
+        self.u = u
+        # Compute observation
+        observation = u[self.observation_inds]
+        return observation, u_hist
 
 
 if __name__ == '__main__':
@@ -105,7 +131,7 @@ if __name__ == '__main__':
     # Defining env
     env = KSenv(nu=0.08,
                 actuator_locs=np.array([0.0, np.pi / 4, np.pi / 2, 3 * np.pi / 4]),
-                sensor_locs=np.array([0.0, 1.0, 2.0]),
+                # sensor_locs=np.array([0.0, 1.0, 2.0]),
                 burn_in=0)
     env.reset()
     print('hi')
