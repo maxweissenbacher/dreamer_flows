@@ -101,6 +101,9 @@ defaults:
   disag_target: [stoch]
   disag_models: 8
 
+  KS:
+    max_episode_steps: 100
+
 minecraft:
 
   task: minecraft_diamond

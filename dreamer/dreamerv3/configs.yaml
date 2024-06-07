@@ -47,6 +47,7 @@ defaults:
     actor_batch: 32
 
   envs: {amount: 4, parallel: process, length: 0, reset: True, restart: True, discretize: 0, checks: False}
+  
   wrapper: {length: 0, reset: True, discretize: 0, checks: False}
   env:
     atari: {size: [64, 64], repeat: 4, sticky: True, gray: False, actions: all, lives: unused, noops: 0, resize: opencv}
@@ -103,8 +104,12 @@ defaults:
   disag_target: [stoch]
   disag_models: 8
 
+  KS:
+    max_episode_steps: 100
+
 minecraft:
 
+  max_episode_steps: 100
   task: minecraft_diamond
   envs.amount: 16
   run:

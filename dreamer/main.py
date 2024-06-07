@@ -1,3 +1,4 @@
+#not working yet
 import sys
 
 def main(keyword_args):
@@ -11,6 +12,7 @@ def main(keyword_args):
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
   config = config.update(dreamerv3.configs['small'])
+  # config = config.update(dreamerv3.configs['KS'])
 
   config = config.update({
   'logdir': '~/PhD_projects2/dreamer_flows/dreamer/logdir/ks_units128_sametrainratio',
@@ -66,9 +68,9 @@ def main(keyword_args):
   #     'jax.platform': 'cpu',
   #     'wrapper.length': 0,
   # })
-
+  
+  # print("config: ", config)
   config = embodied.Flags(config).parse()
-
   print("Number of Envs: ", config.envs.amount)
 
   logdir = embodied.Path(config.logdir)
@@ -84,14 +86,15 @@ def main(keyword_args):
   #   import crafter
   import gym
   from embodied.envs import from_gym
-
+  from gym.wrappers.time_limit import TimeLimit
+  # import gym.Wrapper.TimeLimit
   from ks.KS_environment import KSenv
   import numpy as np
 
-  env = KSenv(nu=0.08,
+  env = TimeLimit(KSenv(nu=0.08,
               actuator_locs=np.linspace(0.2, 2 * np.pi - 0.2, 7),#np.array([0.0, np.pi / 4, np.pi / 2, 3 * np.pi / 4]),
               # sensor_locs=np.array([0, 2 * np.pi, 64]),
-              burn_in=1500)
+              burn_in=1500), max_episode_steps = config.KS.max_episode_steps)
 
   # env = gym.make('CartPole-v1')
   # env = crafter.Env()  # Replace this with your Gym env.
@@ -121,7 +124,7 @@ if __name__ == '__main__':
   keyword_args = {}
   # --.*\.units=256 --.*\.layers=2
   for arg in sys.argv[1:]:
-      print(arg)
+    #   print(arg)
       if ".*." in arg:
           key, value = arg.split('=', 1)
           key = key[5:]
