@@ -77,8 +77,8 @@ def main(keyword_args):
   eval_replay = embodied.replay.Uniform(
                 config.batch_length, config.replay_size, logdir / 'eval_replay')
   env = make_ks_env(config)
-  eval_env = make_ks_envs(config)  # mode='eval'
-  agent = agt.Agent(env.obs_space, env.act_space, step, config)
+  eval_env = make_ks_env(config)  # mode='eval'
+  agent = dreamerv3.Agent(env.obs_space, env.act_space, step, config)
   args = embodied.Config(
       **config.run, logdir=config.logdir,
       batch_steps=config.batch_size * config.batch_length)
@@ -91,7 +91,8 @@ def main(keyword_args):
   # args = embodied.Config(
   #     **config.run, logdir=config.logdir,
   #     batch_steps=config.batch_size * config.batch_length)
-  # embodied.run.train(agent, env, replay, logger, args)
+  embodied.run.train_eval_rollout(
+          agent, env, eval_env, replay, eval_replay, logger, args)
 
   #eval_only
   # embodied.run.eval_only(agent, env, logger, args)

@@ -36,13 +36,16 @@ class Driver:
   def on_episode(self, callback):
     self._on_episodes.append(callback)
 
-  def __call__(self, policy, steps=0, episodes=0):
+  def __call__(self, policy, steps=0, episodes=0, eval = False): #eval added by Priyam
     step, episode = 0, 0
     while step < steps or episode < episodes:
-      step, episode = self._step(policy, step, episode)
+      if eval:
+        step, episode = self._eval_step(policy, step, episode)  #added by Priyam
+      else:
+        step, episode = self._step(policy, step, episode)
 
   def _step(self, policy, step, episode):
-    print("step in driver: ", step)
+    # print("step in driver: ", step)
     assert all(len(x) == len(self._env) for x in self._acts.values())
     acts = {k: v for k, v in self._acts.items() if not k.startswith('log_')}
     obs = self._env.step(acts)
@@ -50,21 +53,27 @@ class Driver:
     assert all(len(x) == len(self._env) for x in obs.values()), obs
     acts, self._state = policy(obs, self._state, **self._kwargs)
     acts = {k: convert(v) for k, v in acts.items()}
+    
     if obs['is_last'].any():
       mask = 1 - obs['is_last']
       acts = {k: v * self._expand(mask, len(v.shape)) for k, v in acts.items()}
     acts['reset'] = obs['is_last'].copy()
+    
     self._acts = acts
     trns = {**obs, **acts}
+    
     if obs['is_first'].any():
       for i, first in enumerate(obs['is_first']):
         if first:
           self._eps[i].clear()
+          
+    #      
     for i in range(len(self._env)):
       trn = {k: v[i] for k, v in trns.items()}
       [self._eps[i][k].append(v) for k, v in trn.items()]
       [fn(trn, i, **self._kwargs) for fn in self._on_steps]
       step += 1
+      
     if obs['is_last'].any():
       for i, done in enumerate(obs['is_last']):
         if done:
@@ -73,7 +82,50 @@ class Driver:
           episode += 1
     return step, episode
 
+  # 
   def _expand(self, value, dims):
     while len(value.shape) < dims:
       value = value[..., None]
     return value
+  
+  
+  
+  
+  # def _eval_step(self, policy, step, episode):
+  #   #added by Priyam
+  #   # print("step in driver: ", step)
+  #   assert all(len(x) == len(self._env) for x in self._acts.values())
+  #   acts = {k: v for k, v in self._acts.items() if not k.startswith('log_')}
+  #   obs = self._env.step(acts)
+  #   obs = {k: convert(v) for k, v in obs.items()}
+  #   assert all(len(x) == len(self._env) for x in obs.values()), obs
+  #   acts, self._state = policy(obs, self._state, **self._kwargs)
+  #   acts = {k: convert(v) for k, v in acts.items()}
+    
+  #   if obs['is_last'].any():
+  #     mask = 1 - obs['is_last']
+  #     acts = {k: v * self._expand(mask, len(v.shape)) for k, v in acts.items()}
+  #   acts['reset'] = obs['is_last'].copy()
+    
+  #   self._acts = acts
+  #   trns = {**obs, **acts}
+    
+  #   if obs['is_first'].any():
+  #     for i, first in enumerate(obs['is_first']):
+  #       if first:
+  #         self._eps[i].clear()
+          
+  #   #      
+  #   for i in range(len(self._env)):
+  #     trn = {k: v[i] for k, v in trns.items()}
+  #     [self._eps[i][k].append(v) for k, v in trn.items()]
+  #     [fn(trn, i, **self._kwargs) for fn in self._on_steps]
+  #     step += 1
+      
+  #   if obs['is_last'].any():
+  #     for i, done in enumerate(obs['is_last']):
+  #       if done:
+  #         ep = {k: convert(v) for k, v in self._eps[i].items()}
+  #         [fn(ep.copy(), i, **self._kwargs) for fn in self._on_episodes]
+  #         episode += 1
+  #   return step, episode

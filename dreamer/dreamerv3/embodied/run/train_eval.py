@@ -53,15 +53,18 @@ def train_eval(
         stats[f'max_{key}'] = ep[key].max(0).mean()
     metrics.add(stats, prefix=f'{mode}_stats')
 
+  
   driver_train = embodied.Driver(train_env)
   driver_train.on_episode(lambda ep, worker: per_episode(ep, mode='train'))
   driver_train.on_step(lambda tran, _: step.increment())
   driver_train.on_step(train_replay.add)
+  
   driver_eval = embodied.Driver(eval_env)
   driver_eval.on_step(eval_replay.add)
   driver_eval.on_episode(lambda ep, worker: per_episode(ep, mode='eval'))
 
   random_agent = embodied.RandomAgent(train_env.act_space)
+  
   print('Prefill train dataset.')
   while len(train_replay) < max(args.batch_steps, args.train_fill):
     driver_train(random_agent.policy, steps=100)
@@ -75,6 +78,7 @@ def train_eval(
   dataset_eval = agent.dataset(eval_replay.dataset)
   state = [None]  # To be writable from train step function below.
   batch = [None]
+  
   def train_step(tran, worker):
     for _ in range(should_train(step)):
       with timer.scope('dataset_train'):
@@ -96,6 +100,7 @@ def train_eval(
       logger.add(eval_replay.stats, prefix='eval_replay')
       logger.add(timer.stats(), prefix='timer')
       logger.write(fps=True)
+      
   driver_train.on_step(train_step)
 
   checkpoint = embodied.Checkpoint(logdir / 'checkpoint.ckpt')
