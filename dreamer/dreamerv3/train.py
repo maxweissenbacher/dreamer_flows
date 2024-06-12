@@ -155,9 +155,6 @@ def make_envs(config, **overrides):
 
 
 def make_env(config, **overrides):
-  # You can add custom environments by creating and returning the environment
-  # instance here. Environments with different interfaces can be converted
-  # using `embodied.envs.from_gym.FromGym` and `embodied.envs.from_dm.FromDM`.
   suite, task = config.task.split('_', 1)
   ctor = {
       'dummy': 'embodied.envs.dummy:Dummy',
@@ -180,7 +177,6 @@ def make_env(config, **overrides):
   env = ctor(task, **kwargs)
   return wrap_env(env, config)
 
-
 def wrap_env(env, config):
   args = config.wrapper
   for name, space in env.act_space.items():
@@ -201,6 +197,41 @@ def wrap_env(env, config):
     if not space.discrete:
       env = wrappers.ClipAction(env, name)
   return env
+
+
+def make_ks_env(config):
+  import gym
+  from embodied.envs import from_gym
+  from gym.wrappers.time_limit import TimeLimit
+  from ks.KS_environment import KSenv
+  import numpy as np
+  
+  env = TimeLimit(KSenv(nu=0.08,
+              actuator_locs=np.linspace(0.2, 2 * np.pi - 0.2, 20),#np.array([0.0, np.pi / 4, np.pi / 2, 3 * np.pi / 4]),
+              actuator_scale=0.1,
+              frame_skip=1,
+              # sensor_locs=np.array([0, 2 * np.pi, 64]),
+              burn_in=2000), max_episode_steps = 500)
+  
+  env = from_gym.FromGym(env, obs_key='vector')  # Or obs_key='vector'.
+  env = wrap_env(env, config)
+  
+  return env
+
+
+def make_ks_envs(config):
+  #specific for KS
+  suite, task = config.task.split('_', 1)
+  ctors = []
+  for index in range(config.envs.amount):
+    ctor = lambda: make_ks_env(config)
+    if config.envs.parallel != 'none':
+      ctor = bind(embodied.Parallel, ctor, config.envs.parallel)
+    if config.envs.restart:
+      ctor = bind(wrappers.RestartOnException, ctor)
+    ctors.append(ctor)
+  envs = [ctor() for ctor in ctors]
+  return embodied.BatchEnv(envs, parallel=(config.envs.parallel != 'none'))
 
 
 if __name__ == '__main__':

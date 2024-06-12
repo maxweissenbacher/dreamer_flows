@@ -99,12 +99,12 @@ if __name__ == '__main__':
   #for model size
   
   keyword_args = {}
-  # --.*\.units=256 --.*\.layers=2
-  # for arg in sys.argv[1:]:
-  #   #   print(arg)
-  #     if ".*." in arg:
-  #         key, value = arg.split('=', 1)
-  #         key = key[5:]
-  #         keyword_args[key] = value
+#   --.*\.units=256 --.*\.layers=2
+  for arg in sys.argv[1:]:
+    #   print(arg)
+      if ".*." in arg:
+          key, value = arg.split('=', 1)
+          key = key[5:]
+          keyword_args[key] = value
           
   main(keyword_args)

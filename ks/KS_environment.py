@@ -63,6 +63,8 @@ class KSenv(gym.Env):
         self.action_space = spaces.Box(low=self.action_low, high=self.action_high, shape=(self.action_size,))
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.num_observations,))
 
+        print("KS Env Initiated")
+        
     def step(self, action):
         # print("step taken")
         

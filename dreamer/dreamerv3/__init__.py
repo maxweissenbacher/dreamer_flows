@@ -3,4 +3,4 @@ sys.path.append(str(pathlib.Path(__file__).parent))
 
 from .agent import Agent
 configs = Agent.configs
-from .train import wrap_env
+from .train import wrap_env, make_ks_env, make_ks_envs
