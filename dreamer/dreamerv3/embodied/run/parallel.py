@@ -5,7 +5,6 @@ from collections import defaultdict
 import embodied
 import numpy as np
 
-
 def parallel(agent, replay, logger, make_env, num_envs, args):
   step = logger.step
   timer = embodied.Timer()

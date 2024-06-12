@@ -17,7 +17,7 @@ class KSenv(gym.Env):
             # sensor_locs,
             burn_in=100,
             target=None,
-            frame_skip=20,
+            frame_skip=1,
             soft_action=False,
             autoreg_weight=0.0,
             actuator_loss_weight=0.0,

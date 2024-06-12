@@ -4,6 +4,9 @@ defaults:
   method: name
   task: dummy_disc
   logdir: /dev/null
+  logdir_basepath: ~/PhD_projects2/dreamer_flows/dreamer/logdir
+  logdir_expname: Test 
+  logdir_dirname: Test
   replay: uniform
   replay_size: 1e6
   replay_online: False
@@ -103,7 +106,13 @@ defaults:
   disag_models: 8
 
   KS:
-    max_episode_steps: 100
+    nu: 0.08
+    max_episode_steps: 500
+    actuator_scale: 0.1
+    frame_skip: 20
+    burn_in: 2000
+    actuator_num: 20
+
 
 minecraft:
 
@@ -243,7 +252,6 @@ xlarge:
   .*\.layers: 5
 
 multicpu:
-
   jax:
     logical_cpus: 8
     policy_devices: [0, 1]

@@ -1,5 +1,5 @@
-from .eval_only_test import eval_only_test #added by Priyam
-from .train_eval_rollout import train_eval_rollout
+from .eval_only_rollout import eval_only_rollout #added by Priyam
+from .train_eval_rollout import train_eval_rollout #added by Priyam
 from .eval_only import eval_only
 from .parallel import parallel
 from .train import train

@@ -40,3 +40,14 @@ class Metrics:
   def reset(self):
     self._scalars.clear()
     self._lasts.clear()
+    
+  def get_key(self, key):
+    
+    if key in self._lasts.keys():
+      return self._lasts[key]
+    elif key in self._scalars.keys():
+      return self._scalars[key]
+    else:
+      print(f"{key} not in metric returning None")
+      return None
+      
