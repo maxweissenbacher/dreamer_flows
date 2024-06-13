@@ -62,7 +62,7 @@ def main(keyword_args):
   ############################ Creating logger ##############################
   wandb.init(
         project="dreamerKS_test",
-        name=logdir,
+        name=logdir.name,
         # sync_tensorboard=True,,
         entity='why_are_all_the_good_names_taken_aaa-bots',
         config=dict(config),
