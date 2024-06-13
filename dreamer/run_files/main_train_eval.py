@@ -59,21 +59,19 @@ def main(keyword_args):
   print('Logdir', logdir)
   print("Number of Envs: ", config.envs.amount)
 
-  ############################ Creating logger ##############################
-  wandb.init(
-        project="dreamerKS_test",
-        name=logdir.name,
-        # sync_tensorboard=True,,
-        entity='why_are_all_the_good_names_taken_aaa',
-        config=dict(config),
-    )
-  
+  ############################ Creating logger ##############################  
   step = embodied.Counter()
   logger = embodied.Logger(step, [
       embodied.logger.TerminalOutput(),
       embodied.logger.JSONLOutput(logdir, 'metrics.jsonl'),
       embodied.logger.TensorBoardOutput(logdir),
-      embodied.logger.WandBOutput(logdir.name, config),
+      embodied.logger.WandBOutput(
+            pattern="$",
+            logdir=logdir.name,
+            project='dreamerKS_test2',
+            entity='why_are_all_the_good_names_taken_aaa',
+            config=config
+        ),
       # embodied.logger.MLFlowOutput(logdir.name),
   ])
   
