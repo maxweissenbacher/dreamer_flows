@@ -64,7 +64,7 @@ def main(keyword_args):
         project="dreamerKS_test",
         name=logdir.name,
         # sync_tensorboard=True,,
-        entity='why_are_all_the_good_names_taken_aaa-bots',
+        entity='why_are_all_the_good_names_taken_aaa',
         config=dict(config),
     )
   
