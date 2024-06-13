@@ -143,7 +143,6 @@ def train_eval_rollout(
       #calculating and logging mean reward for eval episode
       eval_eps_reward = np.array(metrics.get_key("rollout_eval_episode/reward"))
       mean_eval_eps_reward = np.mean(eval_eps_reward)
-      print("eval_eps_reward", eval_eps_reward)
       last_eval_eps_reward = eval_eps_reward[-1]
       logger.add({'mean_reward': mean_eval_eps_reward, 'last_reward': last_eval_eps_reward}, prefix='rollout_eval_episode')
 

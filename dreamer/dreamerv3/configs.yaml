@@ -110,6 +110,20 @@ defaults:
 
   KS:
     max_episode_steps: 100
+    nu : 0.08
+    num_actuators: 20 
+    actuator_scale: 0.1
+    frame_skip: 1,
+    burn_in: 2000
+  
+  cyl: 
+    horizon: 100
+    random_start: 10    #number of timesteps before starting the control to start in between the vortex 
+                          #True for random number timesteps
+                          #positive integer value for specific number of timesteps
+    dump_vtu: False
+    dump_debug: False
+    simulation_duration: 50
 
 minecraft:
 

@@ -11,7 +11,7 @@ def main(keyword_args):
 
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
-  config = config.update(dreamerv3.configs['small'])
+  config = config.update(dreamerv3.configs['medium'])
   # config = config.update(dreamerv3.configs['multicpu'])
 
   config = config.update({
@@ -24,8 +24,8 @@ def main(keyword_args):
     
   # 'rssm.deter': 128,
   # #   '.*\.cnn_depth': 32
-  '.*\.units': keyword_args["units"],
-  '.*\.layers': keyword_args["layers"],
+  # '.*\.units': keyword_args["units"],
+  # '.*\.layers': keyword_args["layers"],
     
   'encoder.mlp_keys': 'vector',
   'decoder.mlp_keys': 'vector',    
@@ -46,6 +46,11 @@ def main(keyword_args):
   config = config.update({'logdir': logdir_name})
   logdir = embodied.Path(config.logdir)
   logdir.mkdirs()
+  
+  # import os.path
+  # if os.path.isfile(config.logdir+"/config.yaml"):
+     
+  
   config.save(config.logdir+"/config.yaml")
   print('Logdir', logdir)
   print("Number of Envs: ", config.envs.amount)
@@ -69,6 +74,9 @@ def main(keyword_args):
   
   #make env
   # env = make_ks_env(config) 
+  from make_flow_envs import make_flow_envs, make_ks_env
+  env = make_flow_envs(config, env_name="KS")
+
   env = dreamerv3.make_ks_envs(config)
   
   eval_env = dreamerv3.make_ks_env(config)  # mode='eval'
