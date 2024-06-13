@@ -108,6 +108,11 @@ defaults:
   disag_target: [stoch]
   disag_models: 8
 
+  # Wandb parameters
+  wandb:
+    project: 'dreamerKS_compare_num_envs'
+    entity: 'why_are_all_the_good_names_taken_aaa'
+
   KS:
     max_episode_steps: 100
     nu : 0.08

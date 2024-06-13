@@ -68,8 +68,8 @@ def main(keyword_args):
       embodied.logger.WandBOutput(
             pattern="$",
             logdir=logdir,
-            project='dreamerKS_test2',
-            entity='why_are_all_the_good_names_taken_aaa',
+            project=config.wandb.project,
+            entity=config.wandb.entity,
             config=config
         ),
       # embodied.logger.MLFlowOutput(logdir.name),
