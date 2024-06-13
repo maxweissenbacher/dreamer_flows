@@ -1,0 +1,4 @@
+Cylinder_Env/results/*
+Cylinder_Env/__pycache__/*
+Cylinder_Env/.ipynb_checkpoints
+dreamer/Cyl_output/*
