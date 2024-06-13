@@ -7,9 +7,11 @@ MUJOCO_LOG.TXT
 script*
 logdir/*
 __pycache__
-Cyl_output/*
+Cylinder_Env/__pycache__/*
+Cylinder_Env/results/*
+Cyl_output/results/*
 results/*
-../cyl/results/*
+../Cylinder_Env/results/*
 core*
 .ipynb_checkpoints/*
 ;
