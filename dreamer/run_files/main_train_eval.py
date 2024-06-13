@@ -6,6 +6,7 @@ sys.path.append(parent_dir)
 import warnings
 import dreamerv3
 from dreamerv3 import embodied
+import wandb
 
 def main(keyword_args):
 
@@ -58,7 +59,15 @@ def main(keyword_args):
   print('Logdir', logdir)
   print("Number of Envs: ", config.envs.amount)
 
-  ############################ Creating Env ##############################
+  ############################ Creating logger ##############################
+  wandb.init(
+        project="dreamerKS_test",
+        name=logdir,
+        # sync_tensorboard=True,,
+        entity='why_are_all_the_good_names_taken_aaa-bots',
+        config=dict(config),
+    )
+  
   step = embodied.Counter()
   logger = embodied.Logger(step, [
       embodied.logger.TerminalOutput(),
