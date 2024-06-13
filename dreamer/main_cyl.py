@@ -70,21 +70,13 @@ def main():
   sim_log_name = config.logdir.split("/")[-1]
   env  = resume_env(plot=False, dump_CL=False, dump_vtu=False, dump_debug=10, sim_log_name = sim_log_name)
 
-  env = from_gym.FromGym(env, obs_key='vector')  # Or obs_key='vector'.
-  
-  print("wrapping env", flush =True)
+  env = from_gym.FromGym(env, obs_key='vector')  
   env = dreamerv3.wrap_env(env, config)
-  
-  print("batching env", flush =True)
   env = embodied.BatchEnv([env], parallel=False)
-  print("environment has been set", flush =True)
   
-  agent = dreamerv3.Agent(env.obs_space, env.act_space, step, config)
-  print("agent has been created", flush =True)
-  
+  agent = dreamerv3.Agent(env.obs_space, env.act_space, step, config)  
   replay = embodied.replay.Uniform(
       config.batch_length, config.replay_size, logdir / 'replay')
-  print("replay has been created", flush =True)
   
   args = embodied.Config(
       **config.run, logdir=config.logdir,
@@ -95,11 +87,6 @@ def main():
   embodied.run.train(agent, env, replay, logger, args)
 # embodied.run.eval_only(agent, env, logger, args)
 
-
+g
 if __name__ == '__main__':
-  import sys
-  import os
-  cwd = os.getcwd()
-  print(cwd)
-  
   main()

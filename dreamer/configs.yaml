@@ -112,6 +112,15 @@ defaults:
     frame_skip: 20
     burn_in: 2000
     actuator_num: 20
+  
+  cyl: 
+    horizon: 100
+    random_start: True    #number of timesteps before starting the control to start in between the vortex 
+                          #True for random number timesteps
+                          #positive integer value for specific number of timesteps
+    dump_vtu: False
+    dump_debug: False
+    simulation_duration: 50
 
 
 minecraft:

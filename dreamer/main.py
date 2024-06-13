@@ -67,17 +67,7 @@ def main(keyword_args):
   from ks.KS_environment import KSenv
   import numpy as np
 
-  env = TimeLimit(KSenv(nu=0.08,
-              actuator_locs=np.linspace(0.0, 2 * np.pi, config.KS.actuator_num, endpoint=False),
-              actuator_scale=0.1,
-              frame_skip=1,
-              # sensor_locs=np.array([0, 2 * np.pi, 64]),
-              burn_in=2000), 
-                  max_episode_steps = config.KS.max_episode_steps)
-
-  env = from_gym.FromGym(env, obs_key='vector')  # Or obs_key='vector'.
-  env = dreamerv3.wrap_env(env, config)
-  env = embodied.BatchEnv([env], parallel=False)
+  env = dreamerv3.make_ks_envs(config)
 
   agent = dreamerv3.Agent(env.obs_space, env.act_space, step, config)
   replay = embodied.replay.Uniform(
@@ -89,22 +79,33 @@ def main(keyword_args):
   ########################### Run Training or eval ##############################
   embodied.run.train(agent, env, replay, logger, args)
 
-  # eval_only
-  # embodied.run.eval_only(agent, env, logger, args)
 
+def parse_model_size():
+    #for parsing model size from terminal
+    keyword_args = {}
+    for arg in sys.argv[1:]:
+        #   print(arg)
+        if ".*." in arg:
+            key, value = arg.split('=', 1)
+            key = key[5:]
+            keyword_args[key] = value
+    return keyword_args
 
 if __name__ == '__main__':
   
-  
-  #for model size
-  
-  keyword_args = {}
-#   --.*\.units=256 --.*\.layers=2
-  for arg in sys.argv[1:]:
-    #   print(arg)
-      if ".*." in arg:
-          key, value = arg.split('=', 1)
-          key = key[5:]
-          keyword_args[key] = value
-          
+  keyword_args = parse_model_size()
   main(keyword_args)
+
+
+
+#   env = TimeLimit(KSenv(nu=0.08,
+#               actuator_locs=np.linspace(0.0, 2 * np.pi, config.KS.actuator_num, endpoint=False),
+#               actuator_scale=0.1,
+#               frame_skip=1,
+#               # sensor_locs=np.array([0, 2 * np.pi, 64]),
+#               burn_in=2000), 
+#                   max_episode_steps = config.KS.max_episode_steps)
+
+#   env = from_gym.FromGym(env, obs_key='vector')  # Or obs_key='vector'.
+#   env = dreamerv3.wrap_env(env, config)
+#   env = embodied.BatchEnv([env], parallel=False)
