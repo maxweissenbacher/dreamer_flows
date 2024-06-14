@@ -17,10 +17,6 @@ def main(keyword_args):
   config = embodied.Config(dreamerv3.configs['defaults'])
   config = config.update(dreamerv3.configs['large'])
   config = config.update({
-  'run.train_ratio': 64,
-  'run.log_every': 30,  # seconds
-  'batch_length': 64,
-  'jax.prealloc': False,
   # 'rssm.deter': 128,
   # #   '.*\.cnn_depth': 32
   # '.*\.units': keyword_args["units"],
