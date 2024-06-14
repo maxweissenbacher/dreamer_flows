@@ -19,10 +19,10 @@ def main(keyword_args):
 
   config = config.update({
   'run.eval_every': 4000, 
-  'run.train_ratio': 64,
+  'run.train_ratio': 32,#64,
   'run.log_every': 30,  # seconds
-  'batch_size': 16,
-  'batch_length': 64,
+  'batch_size': 8,#16,
+  'batch_length': 8,#64,
   'jax.prealloc': False,
     
   # 'rssm.deter': 128,
@@ -74,17 +74,17 @@ def main(keyword_args):
   from make_flow_envs import make_flow_envs, make_cyl_env
   env = make_flow_envs(config, env_name="CYL")
   eval_env = make_cyl_env(config, n_env=0, 
-                          sim_log_name = config.cyl.logdir_dirname+"/"+\
-                                         config.cyl.logdir_expname)  # mode='eval'
+                          sim_log_name = config.logdir_dirname+"/"+\
+                                         config.logdir_expname, mode = "eval")  # mode='eval'
   eval_env = embodied.BatchEnv([eval_env], parallel=False)
 
   agent = dreamerv3.Agent(env.obs_space, env.act_space, step, config)
-  args = embodied.Config(
+  args  = embodied.Config(
       **config.run, logdir=config.logdir,
       batch_steps=config.batch_size * config.batch_length)
 
   ########################### Run Training or eval ##############################
-  embodied.run.train_eval_rollout_noreplay(
+  embodied.run.train_eval_rollout_noevalreplay(
           agent, env, eval_env, replay, logger, args)
 
 
@@ -101,5 +101,7 @@ def parse_model_size():
 
 if __name__ == '__main__':
   
+#   os.environ['LD_LIBRARY_PATH'] = '~/anaconda3/envs/dreamer_cyl2/lib/:$LD_LIBRARY_PATH'
+  os.system("echo $LD_LIBRARY_PATH")
   keyword_args = parse_model_size()
   main(keyword_args)

@@ -10,7 +10,7 @@ def train_eval_rollout(
   logdir = embodied.Path(args.logdir)
   should_expl = embodied.when.Until(args.expl_until)
   should_train = embodied.when.Ratio(args.train_ratio / args.batch_steps)
-  should_log = embodied.when.Clock(args.log_every)
+  should_log = embodied.when.Every(args.log_every)
   should_save = embodied.when.Clock(args.save_every)
   
   should_eval = embodied.when.Every(args.eval_every, args.eval_initial)
@@ -25,15 +25,21 @@ def train_eval_rollout(
   timer = embodied.Timer()
   timer.wrap('agent', agent, ['policy', 'train', 'report', 'save'])
   timer.wrap('env', train_env, ['step'])
-  if hasattr(train_replay, '_sample'):
-    timer.wrap('replay', train_replay, ['_sample'])
+  timer.wrap('replay', replay, ['add', 'save'])
+  timer.wrap('logger', logger, ['write'])
+  # if hasattr(train_replay, '_sample'):
+  #   timer.wrap('replay', train_replay, ['_sample'])
 
   nonzeros = set()
   def per_episode(ep, mode):
     length = len(ep['reward']) - 1
     score = float(ep['reward'].astype(np.float64).sum())
+    sum_abs_reward = float(np.abs(ep['reward']).astype(np.float64).sum())
     logger.add({
-        'length': length, 'score': score, 'reward': ep['reward'],
+        'length': length, 
+        'score': score, 
+        'sum_abs_reward': sum_abs_reward,
+        'reward': ep['reward'],
         'reward_rate': (ep['reward'] - ep['reward'].min() >= 0.1).mean(),
     }, prefix=('episode' if mode == 'train' else f'{mode}_episode'))
     print(f'Episode has {length} steps and return {score:.1f}.')

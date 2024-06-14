@@ -31,7 +31,7 @@ defaults:
     expl_until: 0
     log_every: 300
     save_every: 900
-    eval_every: 1e6
+    eval_every: 20
     eval_initial: True
     eval_eps: 1
     eval_steps: 100    #added by Priyam
@@ -44,6 +44,7 @@ defaults:
     log_keys_sum: '^$'
     log_keys_mean: '(log_entropy)'
     log_keys_max: '^$'
+    log_keys_eval: '(lift, drag)'
     from_checkpoint: ''
     sync_every: 10
     # actor_addr: 'tcp://127.0.0.1:5551'
@@ -118,12 +119,15 @@ defaults:
   
   cyl: 
     horizon: 100
+    simulation_duration: 50
     random_start: 10    #number of timesteps before starting the control to start in between the vortex 
                           #True for random number timesteps
                           #positive integer value for specific number of timesteps
     dump_vtu: False
-    dump_debug: False
-    simulation_duration: 50
+    dump_debug: 10
+    eval_dump_vtu: 20
+    eval_dump_debug: 10
+    
 
 minecraft:
 

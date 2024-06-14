@@ -1,6 +1,10 @@
-import argparse
-import os
 import sys
+import os
+cwd = os.getcwd()
+sys.path.append(cwd + "/Cylinder_Env/")
+sys.path.append(os.path.dirname(cwd) + "/Cylinder_Env/")
+
+import argparse
 import csv
 import socket
 import numpy as np

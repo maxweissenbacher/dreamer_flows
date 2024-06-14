@@ -4,7 +4,7 @@ import embodied
 import numpy as np
 
 
-def train_eval_rollout(
+def train_eval_rollout_noevalreplay(
     agent, train_env, eval_env, train_replay, logger, args):
 
   logdir = embodied.Path(args.logdir)
@@ -73,14 +73,14 @@ def train_eval_rollout(
   print('Prefill train dataset.')
   while len(train_replay) < max(args.batch_steps, args.train_fill):
     driver_train(random_agent.policy, steps=100)
-  print('Prefill eval dataset.')
-  while len(eval_replay) < max(args.batch_steps, args.eval_fill):
-    driver_eval(random_agent.policy, steps=100)
+  # print('Prefill eval dataset.')
+  # while len(eval_replay) < max(args.batch_steps, args.eval_fill):
+  #   driver_eval(random_agent.policy, steps=100)
   logger.add(metrics.result())
   logger.write()
 
   dataset_train = agent.dataset(train_replay.dataset)
-  dataset_eval = agent.dataset(eval_replay.dataset)
+  # dataset_eval = agent.dataset(eval_replay.dataset)
   state = [None]  # To be writable from train step function below.
   batch = [None]
   
@@ -98,11 +98,11 @@ def train_eval_rollout(
     if should_log(step):
       logger.add(metrics.result())
       logger.add(agent.report(batch[0]), prefix='report')
-      with timer.scope('dataset_eval'):
-        eval_batch = next(dataset_eval)
-      logger.add(agent.report(eval_batch), prefix='eval')
+      # with timer.scope('dataset_eval'):
+      #   eval_batch = next(dataset_eval)
+      # logger.add(agent.report(eval_batch), prefix='eval')
       logger.add(train_replay.stats, prefix='replay')
-      logger.add(eval_replay.stats, prefix='eval_replay')
+      # logger.add(eval_replay.stats, prefix='eval_replay')
       logger.add(timer.stats(), prefix='timer')
       logger.write(fps=True)
       
@@ -112,7 +112,7 @@ def train_eval_rollout(
   checkpoint.step = step
   checkpoint.agent = agent
   checkpoint.train_replay = train_replay
-  checkpoint.eval_replay = eval_replay
+  # checkpoint.eval_replay = eval_replay
   if args.from_checkpoint:
     checkpoint.load(args.from_checkpoint)
   checkpoint.load_or_save()
@@ -151,13 +151,4 @@ def train_eval_rollout(
       checkpoint.save()
   logger.write()
   logger.write()
-  
-  # print('Start evaluation loop.')
-  # policy = lambda *args: agent.policy(*args, mode='eval')
-  # while step < args.steps:
-  #   driver(policy, steps=100)
-  #   if should_log(step):
-  #     logger.add(metrics.result())
-  #     logger.add(timer.stats(), prefix='timer')
-  #     logger.write(fps=True)
-  # logger.write()
+

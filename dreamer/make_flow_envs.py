@@ -34,7 +34,7 @@ def make_ks_env(config, n_env = 0, sim_log_name = "KS"):
   env = dreamerv3.wrap_env(env, config)
   return env
 
-def make_cyl_env(config, n_env = 0, sim_log_name = "Test_cylinder"):
+def make_cyl_env(config, n_env = 0, sim_log_name = "Test_cylinder", mode='train'):
   import gym
   from gym.wrappers.time_limit import TimeLimit
   from Cylinder_Env.simulation_base.env import resume_env
@@ -45,16 +45,28 @@ def make_cyl_env(config, n_env = 0, sim_log_name = "Test_cylinder"):
   #                   dump_vtu=False, dump_debug=10, \
   #                   sim_log_name = sim_log_name)
   
-  env = resume_env(plot=False,
-                     single_run=False,
-                     horizon=config.cyl.horizon,
-                     dump_vtu=config.cyl.dump_vtu,
-                     dump_debug = config.cyl.dump_debug, 
-                     random_start= config.cyl.random_start,
-                     n_env=n_env,
-                     simulation_duration=config.cyl.simulation_duration,
-                     sim_log_name = sim_log_name
-                     )
+  if mode == "train":
+    env = resume_env(plot=False,
+                      single_run=False,
+                      horizon=config.cyl.horizon,
+                      dump_vtu=config.cyl.dump_vtu,
+                      dump_debug = config.cyl.dump_debug, 
+                      random_start= config.cyl.random_start,
+                      n_env=n_env,
+                      simulation_duration=config.cyl.simulation_duration,
+                      sim_log_name = sim_log_name+"/train"
+                      )
+  elif mode == "eval":
+    env = resume_env(plot=False,
+                      single_run=True,
+                      horizon=config.cyl.horizon,
+                      dump_vtu=config.cyl.eval_dump_vtu,
+                      dump_debug = config.cyl.eval_dump_debug, 
+                      random_start= config.cyl.random_start,
+                      n_env=n_env,
+                      simulation_duration=config.cyl.simulation_duration,
+                      sim_log_name = sim_log_name+"/eval"
+                      )
   
   env = from_gym.FromGym(env, obs_key='vector')  # Or obs_key='vector'.
   env = dreamerv3.wrap_env(env, config)

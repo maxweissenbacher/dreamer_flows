@@ -15,7 +15,7 @@ def main(keyword_args):
 
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
-  config = config.update(dreamerv3.configs['medium'])
+#   config = config.update(dreamerv3.configs['medium'])
   # config = config.update(dreamerv3.configs['multicpu'])
 
   config = config.update({
@@ -26,10 +26,10 @@ def main(keyword_args):
   'batch_length': 64,
   'jax.prealloc': False,
     
-  # 'rssm.deter': 128,
-  # #   '.*\.cnn_depth': 32
-  # '.*\.units': keyword_args["units"],
-  # '.*\.layers': keyword_args["layers"],
+#   'rssm.deter': 2048,
+  #   '.*\.cnn_depth': 32
+#   '.*\.units': keyword_args["units"],
+#   '.*\.layers': keyword_args["layers"],
     
   'encoder.mlp_keys': 'vector',
   'decoder.mlp_keys': 'vector',    

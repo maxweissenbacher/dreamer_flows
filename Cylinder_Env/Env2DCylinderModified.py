@@ -6,9 +6,7 @@ Environment seen by the RL agent. It is the main class of the repo.
 import sys
 import os
 cwd = os.getcwd()
-print(cwd)
-sys.path.append(cwd + "/Cylinder_Env/")
-
+sys.path.append(os.path.dirname(cwd) + "/Cylinder_Env/")
 
 from dolfin import Expression, File, plot
 from probes import PenetratedDragProbeANN, PenetratedLiftProbeANN, PressureProbeANN, VelocityProbeANN, RecirculationAreaProbe
@@ -228,14 +226,14 @@ class Env2DCylinderModified(gym.Env):
                 print("Load initial flow state")
 
             # Load initial fields
-            self.flow_params['u_init'] = 'Cylinder_Env/mesh/u_init.xdmf'
-            self.flow_params['p_init'] = 'Cylinder_Env/mesh/p_init.xdmf'
+            self.flow_params['u_init'] = '../Cylinder_Env/mesh/u_init.xdmf'
+            self.flow_params['p_init'] = '../Cylinder_Env/mesh/p_init.xdmf'
 
             if self.verbose > 0:
                 print("Load buffer history")
 
             # Load ring buffers
-            filepath = os.getcwd()+'/Cylinder_Env/mesh/dict_history_parameters.pkl'
+            filepath = os.path.dirname(os.getcwd())+'/Cylinder_Env/mesh/dict_history_parameters.pkl'
             """
             with open(filepath, 'rb') as f:
                 self.history_parameters = pickle.load(f)
@@ -339,8 +337,8 @@ class Env2DCylinderModified(gym.Env):
             comm = mesh.mpi_comm()
 
             # save field data
-            XDMFFile(comm, 'Cylinder_Env/mesh/u_init.xdmf').write_checkpoint(self.u_, 'u0', 0, encoding)
-            XDMFFile(comm, 'Cylinder_Env/mesh/p_init.xdmf').write_checkpoint(self.p_, 'p0', 0, encoding)
+            XDMFFile(comm, '../Cylinder_Env/mesh/u_init.xdmf').write_checkpoint(self.u_, 'u0', 0, encoding)
+            XDMFFile(comm, '../Cylinder_Env/mesh/p_init.xdmf').write_checkpoint(self.p_, 'p0', 0, encoding)
 
             # save buffer dict
             with open('mesh/dict_history_parameters.pkl', 'wb') as f:
@@ -892,7 +890,7 @@ class Env2DCylinderModified(gym.Env):
                  reward (check env.py and compute_reward() function for the reward used)
         '''
         action = actions * 0.1 #scaled for torchrl purposes only, it takes max and min action value to be 1 and -1 respectively
-
+                               #scaled for dreamer purposes as well
 
         if action is None:
             if self.verbose > -1:

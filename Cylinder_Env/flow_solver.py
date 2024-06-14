@@ -6,9 +6,9 @@ import math
 import sys
 import os
 cwd = os.getcwd()
-sys.path.append(cwd + "/../Cylinder_Env/")
 sys.path.append(cwd + "/Cylinder_Env/")
-
+sys.path.append(os.path.dirname(cwd) + "/Cylinder_Env/")
+sys.path.append(os.path.dirname(cwd))
 # Solves FE problem (sets BCs,
 # There are three variational problems to be defined, one for each step in the IPCS scheme
 

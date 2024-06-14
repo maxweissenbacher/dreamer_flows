@@ -1,3 +1,9 @@
+import sys
+import os
+cwd = os.getcwd()
+sys.path.append(cwd + "/Cylinder_Env/")
+sys.path.append(os.path.dirname(cwd) + "/Cylinder_Env/")
+
 import numpy as np
 from mpi4py import MPI as py_mpi
 from dolfin import *
@@ -14,10 +20,10 @@ except ImportError:
 class DragProbe(object):
     '''Integral proble of drag over the tagged mesh oriented exterior surface n.ds'''
     def __init__(self, mu, n, ds, tags, flow_dir=Constant((1, 0))):
-        self.dim = flow_dir.ufl_shape[0]
-        self.mu = mu
-        self.n = n
-        self.ds = ds
+        self.dim  = flow_dir.ufl_shape[0]
+        self.mu   = mu
+        self.n    = n
+        self.ds   = ds
         self.tags = tags
         self.flow_dir = flow_dir
 
