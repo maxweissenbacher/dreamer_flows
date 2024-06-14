@@ -15,30 +15,21 @@ def main(keyword_args):
 
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
-  config = config.update(dreamerv3.configs['medium'])
-  # config = config.update(dreamerv3.configs['multicpu'])
-
+  config = config.update(dreamerv3.configs['large'])
   config = config.update({
-  'run.eval_every': 4000, 
   'run.train_ratio': 64,
   'run.log_every': 30,  # seconds
-  'batch_size': 16,
   'batch_length': 64,
   'jax.prealloc': False,
-    
   # 'rssm.deter': 128,
   # #   '.*\.cnn_depth': 32
   # '.*\.units': keyword_args["units"],
   # '.*\.layers': keyword_args["layers"],
-    
   'encoder.mlp_keys': 'vector',
   'decoder.mlp_keys': 'vector',    
   'encoder.cnn_keys': '$^',
-  'decoder.cnn_keys': '$^',
-        
+  'decoder.cnn_keys': '$^',   
   'model_opt.lr': 1e-4,
-    
-  'jax.platform': 'cpu',
   'wrapper.length': 0,
   })
 
@@ -84,15 +75,15 @@ def main(keyword_args):
   
   #make env
   # env = make_ks_env(config) 
-  from make_flow_envs import make_flow_envs, make_ks_env
-  env = make_flow_envs(config, env_name="KS")
+  # from make_flow_envs import make_flow_envs
+  # env = make_flow_envs(config, env_name="KS")
 
-  env = dreamerv3.make_ks_envs(config)
+  train_env = dreamerv3.make_parallel_ks_envs(config)
   
-  eval_env = dreamerv3.make_ks_env(config)  # mode='eval'
+  eval_env = dreamerv3.make_ks_env(config)
   eval_env = embodied.BatchEnv([eval_env], parallel=False)
 
-  agent = dreamerv3.Agent(env.obs_space, env.act_space, step, config)
+  agent = dreamerv3.Agent(train_env.obs_space, train_env.act_space, step, config)
   args = embodied.Config(
       **config.run, logdir=config.logdir,
       batch_steps=config.batch_size * config.batch_length)
@@ -100,10 +91,10 @@ def main(keyword_args):
     
   ########################### Run Training or eval ##############################
   embodied.run.train_eval_rollout(
-          agent, env, eval_env, replay, eval_replay, logger, args)
+          agent, train_env, eval_env, replay, eval_replay, logger, args)
 
   #eval_only
-  # embodied.run.eval_only(agent, env, logger, args)
+  # embodied.run.eval_only(agent, train_env, logger, args)
 
 def parse_model_size():
     #for parsing model size from terminal

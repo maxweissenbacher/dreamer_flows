@@ -206,12 +206,16 @@ def make_ks_env(config):
   from ks.KS_environment import KSenv
   import numpy as np
   
-  env = TimeLimit(KSenv(nu=0.08,
-              actuator_locs=np.linspace(0.2, 2 * np.pi - 0.2, 20),#np.array([0.0, np.pi / 4, np.pi / 2, 3 * np.pi / 4]),
-              actuator_scale=0.1,
-              frame_skip=1,
-              # sensor_locs=np.array([0, 2 * np.pi, 64]),
-              burn_in=2000), max_episode_steps = 500)
+  env = TimeLimit(
+          KSenv(
+            nu=config.KS.nu,
+            actuator_locs=np.linspace(start=0.0, stop=2 * np.pi, num=config.KS.num_actuators, endpoint=False),
+            actuator_scale=config.KS.actuator_scale,
+            frame_skip=1,
+            burn_in=config.KS.burn_in,
+          ),
+          max_episode_steps = config.KS.max_episode_steps,
+        )
   
   env = from_gym.FromGym(env, obs_key='vector')  # Or obs_key='vector'.
   env = wrap_env(env, config)
@@ -219,11 +223,9 @@ def make_ks_env(config):
   return env
 
 
-def make_ks_envs(config):
-  #specific for KS
-  suite, task = config.task.split('_', 1)
+def make_parallel_ks_envs(config):
   ctors = []
-  for index in range(config.envs.amount):
+  for _ in range(config.envs.amount):
     ctor = lambda: make_ks_env(config)
     if config.envs.parallel != 'none':
       ctor = bind(embodied.Parallel, ctor, config.envs.parallel)

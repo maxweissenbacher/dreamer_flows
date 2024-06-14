@@ -31,7 +31,7 @@ defaults:
     expl_until: 0
     log_every: 300
     save_every: 900
-    eval_every: 1e6
+    eval_every: 4000
     eval_initial: True
     eval_eps: 1
     eval_steps: 100    #added by Priyam
@@ -114,7 +114,7 @@ defaults:
     entity: 'why_are_all_the_good_names_taken_aaa'
 
   KS:
-    max_episode_steps: 100
+    max_episode_steps: 500
     nu : 0.08
     num_actuators: 20 
     actuator_scale: 0.1

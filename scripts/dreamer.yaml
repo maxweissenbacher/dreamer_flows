@@ -30,13 +30,15 @@ spec:
          wandb login ac8ec66b318e6624089b2723c3174f01a850416c;
          cd dreamer;
          # python -c "import jax; print('jax version', jax.__version__); from jax.lib import xla_bridge; print(xla_bridge.get_backend().platform)"
-         python run_files/main_train_eval.py --jax.platform gpu \
-               --envs.amount 3 --envs.parallel process\
+         python run_files/main_train_eval.py \
+               --jax.platform gpu \
+               --envs.amount 5 \
                --loss_scales.reward 10 \
-               --KS.max_episode_steps 500 --imag_horizon 15 \
-               --logdir_dirname Experiments/New_Model_Size_Test \
-               --logdir_expname ks_medium_imag20_burnin2000_env4_rs10_tl500 \
-               --batch_size 128;
+               --imag_horizon 15 \
+               --batch_size 128 \
+               --logdir_dirname Experiments/ \
+               --logdir_expname ks_test_new_params \
+               --wandb.project dreamer_ks_test_params;
      resources:
       requests:
        cpu: 8
