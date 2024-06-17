@@ -3,6 +3,7 @@ Cylinder_Env/__pycache__/*
 Cylinder_Env/.ipynb_checkpoints
 dreamer/Cyl_output/*
 dreamer/eval_notebooks/.ipynb_checkpoints/*
+dreamer/eval_notebooks/*
 */wandb
 */__pycache__
 */wandb
