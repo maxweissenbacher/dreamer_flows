@@ -150,7 +150,7 @@ def train_eval_rollout(
     if should_save(step):
       checkpoint.save()
 
-    if step % 1e7 == 1e4:
+    if int(step) % 1e7 == 1e4:
       checkpoint_2 = embodied.Checkpoint(logdir / f"step_{step}" / 'checkpoint.ckpt')
       checkpoint_2.step = step
       checkpoint_2.agent = agent
