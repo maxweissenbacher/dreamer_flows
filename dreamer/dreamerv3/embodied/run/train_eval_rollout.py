@@ -149,6 +149,15 @@ def train_eval_rollout(
     driver_train(policy_train, steps=100)
     if should_save(step):
       checkpoint.save()
+
+    if step % 1e7 == 1e4:
+      checkpoint_2 = embodied.Checkpoint(logdir / f"step_{step}" / 'checkpoint.ckpt')
+      checkpoint_2.step = step
+      checkpoint_2.agent = agent
+      checkpoint_2.train_replay = train_replay
+      checkpoint_2.eval_replay = eval_replay
+      checkpoint_2.save()
+
   logger.write()
   logger.write()
   
