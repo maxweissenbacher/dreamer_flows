@@ -15,7 +15,7 @@ def main(keyword_args):
 
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
-  config = config.update(dreamerv3.configs['large'])
+  config = config.update(dreamerv3.configs['small'])
 #   config = config.update(dreamerv3.configs['medium'])
   # config = config.update(dreamerv3.configs['multicpu'])
 
@@ -46,8 +46,8 @@ def main(keyword_args):
   config = embodied.Flags(config).parse()
   
   logdir_name = config.logdir_basepath+'/'+\
-           config.logdir_dirname+'/'+\
-           config.logdir_expname  
+                config.logdir_dirname+'/'+\
+                config.logdir_expname  
   config = config.update({'logdir': logdir_name})
   logdir = embodied.Path(config.logdir)
   logdir.mkdirs()
@@ -57,8 +57,10 @@ def main(keyword_args):
      
   
   config.save(config.logdir+"/config.yaml")
-  print('Logdir', logdir)
+  print("##########################################")
+  print('LOGDIR', config.logdir)
   print("Number of Envs: ", config.envs.amount)
+  print("##########################################")
 
   ############################ Creating logger ##############################
   wandb.init(
