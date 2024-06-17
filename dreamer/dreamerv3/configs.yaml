@@ -112,6 +112,7 @@ defaults:
   wandb:
     project: 'dreamerKS_compare_num_envs'
     entity: 'why_are_all_the_good_names_taken_aaa'
+    mode: offline
 
   KS:
     max_episode_steps: 500
