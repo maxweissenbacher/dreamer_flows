@@ -24,10 +24,10 @@ def train_eval_rollout(
   timer = embodied.Timer()
   timer.wrap('agent', agent, ['policy', 'train', 'report', 'save'])
   timer.wrap('env', train_env, ['step'])
-  timer.wrap('replay', replay, ['add', 'save'])
+  # timer.wrap('replay', replay, ['add', 'save'])
   timer.wrap('logger', logger, ['write'])
-  # if hasattr(train_replay, '_sample'):
-  #   timer.wrap('replay', train_replay, ['_sample'])
+  if hasattr(train_replay, '_sample'):
+    timer.wrap('replay', train_replay, ['_sample'])
 
   nonzeros = set()
   def per_episode(ep, mode):
