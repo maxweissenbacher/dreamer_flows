@@ -1,5 +1,5 @@
 cloudpickle
-gym
+gym==0.25
 jax
 numpy
 optax
@@ -8,3 +8,5 @@ ruamel.yaml
 tensorflow
 tensorflow_probability
 matplotlib
+wandb
+tf_keras
