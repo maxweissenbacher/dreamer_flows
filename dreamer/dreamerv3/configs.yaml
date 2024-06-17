@@ -4,8 +4,8 @@ defaults:
   method: name
   task: dummy_disc
   logdir: /dev/null
-  logdir_basepath: ~/logdir
-  logdir_expname: Test 
+  logdir_basepath: build
+  logdir_expname: Test
   logdir_dirname: Test
   replay: uniform
   replay_size: 1e6
