@@ -32,14 +32,18 @@ spec:
          # python -c "import jax; print('jax version', jax.__version__); from jax.lib import xla_bridge; print(xla_bridge.get_backend().platform)"
          python run_files/main_train_eval.py \
                --jax.platform gpu \
-               --envs.amount 1 \
-               --loss_scales.reward 10 \
+               --envs.amount 5 \
+               --loss_scales.reward 500 \
                --imag_horizon 15 \
                --batch_size 64 \
-               --run.train_ratio 64 \
+               --run.train_ratio 128 \
+               --run.steps 1_000_000 \
+               --KS.nu 0.08 \
+               --logdir_expname ks_loss_scale_reward_500 \
+               --logdir_basepath ../../logdir \
                --logdir_dirname Experiments/ \
-               --logdir_expname ks_num_envs_1 \
-               --wandb.project dreamer_ks_compare_n_envs_2;
+               --wandb.mode offline \
+               --wandb.project dreamer_test;
      resources:
       requests:
        cpu: 8
