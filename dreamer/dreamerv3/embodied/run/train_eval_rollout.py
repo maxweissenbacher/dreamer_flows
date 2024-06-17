@@ -1,5 +1,4 @@
 import re
-
 import embodied
 import numpy as np
 
@@ -59,10 +58,10 @@ def train_eval_rollout(
         stats[f'max_{key}'] = ep[key].max(0).mean()
     metrics.add(stats, prefix=f'{mode}_stats')
 
-  def eval_rollout_log(tran):
+  def eval_rollout_log(tran, worker):
     # print(tran.keys())
     # logger.add({'action': tran["action"], 'state': tran["vector"]}, prefix='rollout_eval_episode')
-    metrics.add({'reward': tran['reward']}, prefix='rollout_eval_episode')
+    metrics.add({f'reward_{worker}': tran['reward']}, prefix='rollout_eval_episode')
   
   driver_train = embodied.Driver(train_env)
   driver_train.on_episode(lambda ep, worker: per_episode(ep, mode='train'))
@@ -71,7 +70,7 @@ def train_eval_rollout(
   
   driver_eval = embodied.Driver(eval_env)
   driver_eval.on_step(eval_replay.add)
-  driver_eval.on_step(lambda tran, _: eval_rollout_log(tran))
+  driver_eval.on_step(lambda tran, worker: eval_rollout_log(tran, worker))
   driver_eval.on_episode(lambda ep, worker: per_episode(ep, mode='eval'))
 
   random_agent = embodied.RandomAgent(train_env.act_space)
@@ -129,28 +128,41 @@ def train_eval_rollout(
       *args, mode='explore' if should_expl(step) else 'train')
   policy_eval = lambda *args: agent.policy(*args, mode='eval')
   while step < args.steps:
-    
     if should_eval(step):
 
       print('Starting evaluation at step', int(step))
       driver_eval.reset()
       # driver_eval(policy_eval, episodes=max(len(eval_env), args.eval_eps))
       
-      #unrolling
-      eval_eps_index = 0
+      eval_eps_rewards = np.empty((0,args.eval_steps))
+      for run_num in range(args.num_rollouts_ensemble // args.num_eval_envs):
+        #unrolling
+        eval_eps_index = 0
+        while eval_eps_index < args.eval_eps:
+          driver_eval(policy_eval, steps = args.eval_steps)
+          # logger.add(metrics.result())
+          # logger.add(timer.stats(), prefix='timer')
+          # logger.write(fps=True)
+          # logger.write()
+          eval_eps_index+=1
+        #calculating and logging mean reward for eval episode "rollout_eval_episode/reward"
+          eval_eps_reward = np.array([metrics.get_key(k) \
+                                    for k in metrics.get_metric_keys() \
+                                    if "rollout_eval_episode/reward" in k])
+          eval_eps_rewards = eval_eps_rewards.concatenate((eval_eps_rewards, eval_eps_reward),axis=0)
+          
+      mean_eval_eps_rewards = np.mean(eval_eps_rewards)
+      last_eval_eps_rewards = np.mean(eval_eps_reward[:,-1])
+      std_eval_eps_rewards  = np.std(eval_eps_reward[:,-1])
+      
+      logger.add({'mean_rewards'      : mean_eval_eps_rewards, 
+                  'mean_last_rewards' : last_eval_eps_rewards, 
+                  'std_last_rewards'  : std_eval_eps_rewards}, prefix='rollout_eval_episode')
 
-      while eval_eps_index < args.eval_eps:
-        driver_eval(policy_eval, steps = args.eval_steps)
-        # logger.add(metrics.result())
-        # logger.add(timer.stats(), prefix='timer')
-        # logger.write(fps=True)
-        # logger.write()
-        eval_eps_index+=1
-      #calculating and logging mean reward for eval episode
-      eval_eps_reward = np.array(metrics.get_key("rollout_eval_episode/reward"))
-      mean_eval_eps_reward = np.mean(eval_eps_reward)
-      last_eval_eps_reward = eval_eps_reward[-1]
-      logger.add({'mean_reward': mean_eval_eps_reward, 'last_reward': last_eval_eps_reward}, prefix='rollout_eval_episode')
+      # eval_eps_reward = np.array(metrics.get_key("rollout_eval_episode/reward"))
+      # mean_eval_eps_reward = np.mean(eval_eps_reward)
+      # last_eval_eps_reward = eval_eps_reward[-1]
+      # logger.add({'mean_reward': mean_eval_eps_reward, 'last_reward': last_eval_eps_reward}, prefix='rollout_eval_episode')
 
     driver_train(policy_train, steps=100)
     if should_save(step):

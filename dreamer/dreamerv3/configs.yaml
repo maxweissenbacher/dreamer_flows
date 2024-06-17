@@ -31,10 +31,14 @@ defaults:
     expl_until: 0
     log_every: 300
     save_every: 900
+    
     eval_every: 20
     eval_initial: True
     eval_eps: 1
     eval_steps: 100    #added by Priyam
+    num_rollouts_ensemble : 20 #added by Priyam
+    num_eval_envs: 4 #added by Priyam
+    
     eval_samples: 1
     train_ratio: 32.0
     train_fill: 0
@@ -42,7 +46,6 @@ defaults:
     log_zeros: False
     log_keys_video: [image]
     log_keys_sum: '^$'
-    log_keys_mean: '(log_entropy)'
     log_keys_max: '^$'
     log_keys_eval: '(lift, drag)'
     from_checkpoint: ''

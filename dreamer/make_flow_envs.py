@@ -74,14 +74,15 @@ def make_cyl_env(config, n_env = 0, sim_log_name = "Test_cylinder", mode='train'
   return env
 
  
-def make_flow_envs(config, env_name = "KS"):
+def make_flow_envs(config, env_name = "KS", num_envs = 1):
   
   assert env_name == "KS" or env_name == "CYL",\
           "Env name should be KS or CYL"
           
   suite, task = config.task.split('_', 1)
   ctors = []
-  for index in range(config.envs.amount):
+  for index in range(num_envs):
+    print(f"in loop env {index}")
     make_env = make_cyl_env if env_name == "CYL" else make_ks_env
     ctor = lambda: make_env(config, n_env = index, 
                             sim_log_name= config.logdir_dirname+"/"+config.logdir_expname)

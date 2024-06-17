@@ -72,7 +72,7 @@ def main(keyword_args):
   #make env
   # env = make_ks_env(config)
   from make_flow_envs import make_flow_envs, make_cyl_env
-  env = make_flow_envs(config, env_name="CYL")
+  env = make_flow_envs(config, env_name="CYL", num_envs = config.envs.amount)
   eval_env = make_cyl_env(config, n_env=0, 
                           sim_log_name = config.logdir_dirname+"/"+\
                                          config.logdir_expname, mode = "eval")  # mode='eval'

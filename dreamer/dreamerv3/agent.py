@@ -181,6 +181,36 @@ class WorldModel(nj.Module):
     metrics = self._metrics(data, dists, post, prior, losses, model_loss)
     return model_loss.mean(), (state, out, metrics)
 
+  # def imagined_rollout(self, data, state):
+  #   embed = self.encoder(data)
+  #   prev_latent, prev_action = state
+  #   prev_actions = jnp.concatenate([
+  #       prev_action[:, None], data['action'][:, :-1]], 1)
+  #   post, prior = self.rssm.observe(
+  #       embed, prev_actions, data['is_first'], prev_latent)
+  #   dists = {}
+  #   feats = {**post, 'embed': embed}
+  #   for name, head in self.heads.items():
+  #     out = head(feats if name in self.config.grad_heads else sg(feats))
+  #     out = out if isinstance(out, dict) else {name: out}
+  #     dists.update(out)
+  #   losses = {}
+  #   losses['dyn'] = self.rssm.dyn_loss(post, prior, **self.config.dyn_loss)
+  #   losses['rep'] = self.rssm.rep_loss(post, prior, **self.config.rep_loss)
+  #   for key, dist in dists.items():
+  #     loss = -dist.log_prob(data[key].astype(jnp.float32))
+  #     assert loss.shape == embed.shape[:2], (key, loss.shape)
+  #     losses[key] = loss
+  #   scaled = {k: v * self.scales[k] for k, v in losses.items()}
+  #   model_loss = sum(scaled.values())
+  #   out = {'embed':  embed, 'post': post, 'prior': prior}
+  #   out.update({f'{k}_loss': v for k, v in losses.items()})
+  #   last_latent = {k: v[:, -1] for k, v in post.items()}
+  #   last_action = data['action'][:, -1]
+  #   state = last_latent, last_action
+  #   metrics = self._metrics(data, dists, post, prior, losses, model_loss)
+  #   return model_loss.mean(), (state, out, metrics)
+    
   def imagine(self, policy, start, horizon):
     first_cont = (1.0 - start['is_terminal']).astype(jnp.float32)
     keys = list(self.rssm.initial(1).keys())
