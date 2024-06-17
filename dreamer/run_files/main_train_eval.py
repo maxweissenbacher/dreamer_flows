@@ -47,7 +47,7 @@ def main(keyword_args):
   
   logdir_name = config.logdir_basepath+'/'+\
            config.logdir_dirname+'/'+\
-           config.logdir_expname
+           config.logdir_expname  
   config = config.update({'logdir': logdir_name})
   logdir = embodied.Path(config.logdir)
   logdir.mkdirs()

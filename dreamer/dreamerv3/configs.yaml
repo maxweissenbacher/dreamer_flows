@@ -36,8 +36,8 @@ defaults:
     eval_initial: True
     eval_eps: 1
     eval_steps: 100    #added by Priyam
-    num_rollouts_ensemble : 20 #added by Priyam
-    num_eval_envs: 4 #added by Priyam
+    num_rollouts_ensemble : 10 #added by Priyam
+    num_eval_envs: 2 #added by Priyam
     
     eval_samples: 1
     train_ratio: 64
@@ -45,6 +45,7 @@ defaults:
     eval_fill: 0
     log_zeros: False
     log_keys_video: [image]
+    log_keys_mean: '^$'
     log_keys_sum: '^$'
     log_keys_max: '^$'
     log_keys_eval: '(lift, drag)'
@@ -122,7 +123,7 @@ defaults:
     nu : 0.08
     num_actuators: 20 
     actuator_scale: 0.1
-    frame_skip: 1,
+    frame_skip: 1
     burn_in: 2000
   
   cyl: 
