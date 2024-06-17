@@ -35,8 +35,8 @@ defaults:
     eval_every: 20
     eval_initial: True
     eval_eps: 1
-    eval_steps: 100    #added by Priyam
-    num_rollouts_ensemble : 10 #added by Priyam
+    eval_rollout_steps: 100    #added by Priyam
+    num_eval_rollouts : 10 #added by Priyam
     num_eval_envs: 2 #added by Priyam
     
     eval_samples: 1

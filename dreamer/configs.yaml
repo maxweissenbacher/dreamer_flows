@@ -4,7 +4,7 @@ defaults:
   method: name
   task: dummy_disc
   logdir: /dev/null
-  logdir_basepath: ~/PhD_projects2/dreamer_flows/dreamer/logdir
+  logdir_basepath: ~/logdir
   logdir_expname: Test 
   logdir_dirname: Test
   replay: uniform
@@ -35,9 +35,9 @@ defaults:
     eval_every: 20
     eval_initial: True
     eval_eps: 1
-    eval_steps: 100    #added by Priyam
-    num_rollouts_ensemble : 20 #added by Priyam
-    num_eval_envs: 4 #added by Priyam
+    eval_rollout_steps: 100    #added by Priyam
+    num_eval_rollouts : 10 #added by Priyam
+    num_eval_envs: 2 #added by Priyam
     
     eval_samples: 1
     train_ratio: 64
@@ -45,6 +45,7 @@ defaults:
     eval_fill: 0
     log_zeros: False
     log_keys_video: [image]
+    log_keys_mean: '^$'
     log_keys_sum: '^$'
     log_keys_max: '^$'
     log_keys_eval: '(lift, drag)'
@@ -55,6 +56,7 @@ defaults:
     actor_batch: 32
 
   envs: {amount: 4, parallel: process, length: 0, reset: True, restart: True, discretize: 0, checks: False}
+  
   wrapper: {length: 0, reset: True, discretize: 0, checks: False}
   env:
     atari: {size: [64, 64], repeat: 4, sticky: True, gray: False, actions: all, lives: unused, noops: 0, resize: opencv}
@@ -62,6 +64,7 @@ defaults:
     minecraft: {size: [64, 64], break_speed: 100.0}
     dmc: {size: [64, 64], repeat: 2, camera: -1}
     loconav: {size: [64, 64], repeat: 2, camera: -1}
+    ks: {size: [64, 64], repeat: 2}
 
   # Agent
   task_behavior: Greedy
@@ -95,6 +98,7 @@ defaults:
   imag_horizon: 15
   imag_unroll: False
   horizon: 333
+  discount: 0.8
   return_lambda: 0.95
   critic_slowreg: logprob
   slow_critic_update: 1
@@ -109,26 +113,34 @@ defaults:
   disag_target: [stoch]
   disag_models: 8
 
+  # Wandb parameters
+  wandb:
+    project: 'dreamerKS_compare_num_envs'
+    entity: 'why_are_all_the_good_names_taken_aaa'
+
   KS:
-    nu: 0.08
     max_episode_steps: 500
+    nu : 0.08
+    num_actuators: 20 
     actuator_scale: 0.1
-    frame_skip: 20
+    frame_skip: 1
     burn_in: 2000
-    actuator_num: 20
   
   cyl: 
     horizon: 100
-    random_start: True    #number of timesteps before starting the control to start in between the vortex 
+    simulation_duration: 50
+    random_start: 10    #number of timesteps before starting the control to start in between the vortex 
                           #True for random number timesteps
                           #positive integer value for specific number of timesteps
     dump_vtu: False
-    dump_debug: False
-    simulation_duration: 50
-
+    dump_debug: 10
+    eval_dump_vtu: 20
+    eval_dump_debug: 10
+    
 
 minecraft:
 
+  max_episode_steps: 100
   task: minecraft_diamond
   envs.amount: 16
   run:
@@ -234,12 +246,6 @@ loconav:
   encoder: {mlp_keys: '.*', cnn_keys: 'image'}
   decoder: {mlp_keys: '.*', cnn_keys: 'image'}
 
-vsmall:
-  rssm.deter: 256
-  .*\.cnn_depth: 32
-  .*\.units: 256
-  .*\.layers: 2
-
 small:
   rssm.deter: 512
   .*\.cnn_depth: 32
@@ -265,14 +271,15 @@ xlarge:
   .*\.layers: 5
 
 multicpu:
+
   jax:
-    logical_cpus: 8
+    logical_cpus: 4
     policy_devices: [0, 1]
-    train_devices: [2, 3, 4, 5, 6, 7]
+    train_devices: [2, 3]  #[2, 3, 4, 5, 6, 7]
   run:
     actor_batch: 4
   envs:
-    amount: 8
+    amount: 4 #8
   batch_size: 12
   batch_length: 10
 

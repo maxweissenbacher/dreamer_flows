@@ -134,12 +134,12 @@ def train_eval_rollout(
       # driver_eval(policy_eval, episodes=max(len(eval_env), args.eval_eps))
       # eval_eps_rewards = np.empty((0,args.eval_steps))
       # print(eval_eps_rewards.shape)
-      for run_num in range(args.num_rollouts_ensemble // args.num_eval_envs):
+      for run_num in range(args.num_eval_rollouts // args.num_eval_envs):
         #unrolling
         driver_eval.reset()
         eval_eps_index = 0
         while eval_eps_index < args.eval_eps:
-          driver_eval(policy_eval, steps = args.eval_steps*args.num_eval_envs)
+          driver_eval(policy_eval, steps = args.eval_rollout_steps*args.num_eval_envs)
           eval_eps_index+=1
           
         # print(np.array(metrics.get_key("rollout_eval_episode/reward_0")).shape)
