@@ -9,6 +9,7 @@ logdir/*
 __pycache__
 Cylinder_Env/__pycache__/*
 Cylinder_Env/results/*
+Cylinder_Env/saved_models/*
 Cyl_output/results/*
 results/*
 ../Cylinder_Env/results/*

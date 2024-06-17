@@ -15,6 +15,7 @@ def main(keyword_args):
 
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
+  config = config.update(dreamerv3.configs['large'])
 #   config = config.update(dreamerv3.configs['medium'])
   # config = config.update(dreamerv3.configs['multicpu'])
 
@@ -60,20 +61,26 @@ def main(keyword_args):
   print("Number of Envs: ", config.envs.amount)
 
   ############################ Creating logger ##############################
-  # wandb.init(
-  #       project="dreamerKS_test",
-  #       name=config.logdir,
-  #       # sync_tensorboard=True,,
-  #       entity='why_are_all_the_good_names_taken_aaa',
-  #       config=dict(config),
-  #   )
+  wandb.init(
+        project="dreamerKS_test",
+        name=config.logdir,
+        # sync_tensorboard=True,,
+        entity='why_are_all_the_good_names_taken_aaa',
+        config=dict(config),
+    )
   
   step = embodied.Counter()
   logger = embodied.Logger(step, [
       embodied.logger.TerminalOutput(),
       embodied.logger.JSONLOutput(logdir, 'metrics.jsonl'),
       embodied.logger.TensorBoardOutput(logdir),
-      # embodied.logger.WandBOutput(config.logdir, config),
+      embodied.logger.WandBOutput(
+            pattern="$",
+            logdir=logdir,
+            project=config.wandb.project,
+            entity=config.wandb.entity,
+            config=config
+        ),
       # embodied.logger.MLFlowOutput(logdir.name),
   ])
   
