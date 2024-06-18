@@ -84,7 +84,7 @@ def make_flow_envs(config, env_name = "KS", num_envs = 1):
   for index in range(num_envs):
     print(f"in loop env {index}")
     make_env = make_cyl_env if env_name == "CYL" else make_ks_env
-    ctor = lambda: make_env(config, n_env = index, 
+    ctor = lambda index=index: make_env(config, n_env = index, 
                             sim_log_name= config.logdir_dirname+"/"+config.logdir_expname)
     if config.envs.parallel != 'none':
       ctor = bind(embodied.Parallel, ctor, config.envs.parallel)
