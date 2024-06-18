@@ -127,14 +127,14 @@ defaults:
     burn_in: 2000
   
   cyl: 
-    horizon: 100
+    horizon: 200
     simulation_duration: 50
-    random_start: 10    #number of timesteps before starting the control to start in between the vortex 
+    random_start: True    #number of timesteps before starting the control to start in between the vortex 
                           #True for random number timesteps
                           #positive integer value for specific number of timesteps
     dump_vtu: False
     dump_debug: 10
-    eval_dump_vtu: 20
+    eval_dump_vtu: False
     eval_dump_debug: 10
     
 

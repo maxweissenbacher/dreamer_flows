@@ -134,7 +134,7 @@ def train_eval_rollout_noevalreplay(
       eval_eps_index = 0
 
       while eval_eps_index < args.eval_eps:
-        driver_eval(policy_eval, steps = args.eval_steps)
+        driver_eval(policy_eval, steps = args.eval_rollout_steps)
         # logger.add(metrics.result())
         # logger.add(timer.stats(), prefix='timer')
         # logger.write(fps=True)
