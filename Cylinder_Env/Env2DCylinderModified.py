@@ -233,12 +233,11 @@ class Env2DCylinderModified(gym.Env):
                 print("Load buffer history")
 
             # Load ring buffers
-            filepath = os.path.dirname(os.getcwd())+'/Cylinder_Env/mesh/dict_history_parameters.pkl'
-            """
-            with open(filepath, 'rb') as f:
+            # filepath = os.path.dirname(os.getcwd())+'/Cylinder_Env/mesh/dict_history_parameters.pkl'
+            
+            with open('../Cylinder_Env/mesh/dict_history_parameters.pkl', 'rb') as f:
                 self.history_parameters = pickle.load(f)
-            """
-            #self.history_parameters = {}
+                
                 
             # Check everything is good to go
 
@@ -326,8 +325,8 @@ class Env2DCylinderModified(gym.Env):
                 self.lift = self.lift_probe.sample(self.u_, self.p_)
                 self.recirc_area = self.area_probe.sample(self.u_, self.p_)
 
-                # self.write_history_parameters()  # Add new step data to history buffers
-                # self.visual_inspection()  # Create dynamic plots, show step data in command line and save it to saved_models/debug.csv
+                self.write_history_parameters()  # Add new step data to history buffers
+                self.visual_inspection()  # Create dynamic plots, show step data in command line and save it to saved_models/debug.csv
                 self.output_data()  # Extend arrays of episode qtys, generate vtu files for area, u and p
 
                 self.solver_step += 1
@@ -341,12 +340,9 @@ class Env2DCylinderModified(gym.Env):
             XDMFFile(comm, '../Cylinder_Env/mesh/p_init.xdmf').write_checkpoint(self.p_, 'p0', 0, encoding)
 
             # save buffer dict
-            with open('mesh/dict_history_parameters.pkl', 'wb') as f:
+            with open('../Cylinder_Env/mesh/dict_history_parameters.pkl', 'wb') as f:
                 pickle.dump(self.history_parameters, f, pickle.HIGHEST_PROTOCOL)
-            
-            with open(self.output_filename+'mesh/dict_history_parameters.pkl', 'wb') as f:
-                pickle.dump(self.history_parameters, f, pickle.HIGHEST_PROTOCOL)
-
+        
 
         # ----------------------------------------------------------------------
         # if reading from disk (no remesh), show to check everything ok
@@ -378,7 +374,7 @@ class Env2DCylinderModified(gym.Env):
             self.lift = self.lift_probe.sample(self.u_, self.p_)
             self.recirc_area = self.area_probe.sample(self.u_, self.p_)
 
-            # self.write_history_parameters()
+            self.write_history_parameters()
 
         # ----------------------------------------------------------------------
         # if necessary, fill the probes buffer
@@ -948,7 +944,7 @@ class Env2DCylinderModified(gym.Env):
             self.recirc_area = self.area_probe.sample(self.u_, self.p_)
 
             # Write to the history buffers
-            # self.write_history_parameters()
+            self.write_history_parameters()
 
             self.accumulated_drag += self.drag
             self.accumulated_lift += self.lift
