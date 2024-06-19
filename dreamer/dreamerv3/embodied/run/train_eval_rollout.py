@@ -150,6 +150,7 @@ def train_eval_rollout(
     if should_save(step):
       checkpoint.save()
 
+    """
     if int(step) % 1e9 == 1e5:
       print(f"\n\n\n\n Checkpointing extra checkpoint now \n\n\n\n")
       checkpoint_2 = embodied.Checkpoint(logdir / f"step_{int(step)}" / 'checkpoint.ckpt')
@@ -158,6 +159,7 @@ def train_eval_rollout(
       checkpoint_2.train_replay = train_replay
       checkpoint_2.eval_replay = eval_replay
       checkpoint_2.save()
+    """
 
   logger.write()
   logger.write()
