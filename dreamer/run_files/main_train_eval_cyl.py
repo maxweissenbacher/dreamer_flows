@@ -52,16 +52,32 @@ def main(keyword_args):
   config.save(config.logdir+"/config.yaml")
   print('Logdir', logdir)
   print("Number of Envs: ", config.envs.amount)
+  
+  wandb.init(
+        project="dreamerKS_test",
+        name=config.logdir,
+        # sync_tensorboard=True,,
+        entity='why_are_all_the_good_names_taken_aaa',
+        config=dict(config),
+    )
 
-  ############################ Creating Env ##############################
   step = embodied.Counter()
   logger = embodied.Logger(step, [
       embodied.logger.TerminalOutput(),
       embodied.logger.JSONLOutput(logdir, 'metrics.jsonl'),
       embodied.logger.TensorBoardOutput(logdir),
-      # embodied.logger.WandBOutput(logdir.name, config),
+      embodied.logger.WandBOutput(
+            pattern="$",
+            logdir=logdir,
+            project=config.wandb.project,
+            entity=config.wandb.entity,
+            config=config
+        )
       # embodied.logger.MLFlowOutput(logdir.name),
   ])
+  
+  ############################ Creating Env ##############################
+  
   
   #make replay
   replay = embodied.replay.Uniform(
