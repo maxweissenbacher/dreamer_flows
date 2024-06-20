@@ -58,7 +58,7 @@ def make_cyl_env(config, n_env = 0, sim_log_name = "Test_cylinder", mode='train'
                       )
   elif mode == "eval":
     env = resume_env(plot=False,
-                      single_run=True,
+                      single_run=False,
                       horizon=config.cyl.horizon,
                       dump_vtu=config.cyl.eval_dump_vtu,
                       dump_debug = config.cyl.eval_dump_debug, 
