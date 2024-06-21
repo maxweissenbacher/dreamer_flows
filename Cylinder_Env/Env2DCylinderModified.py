@@ -110,9 +110,9 @@ class Env2DCylinderModified(gym.Env):
             self.episode_number = 0
 
         # Initialise arrays that store episode data
-        self.episode_drags = np.array([])
-        self.episode_areas = np.array([])
-        self.episode_lifts = np.array([])
+        self.episode_drags, self.avg_drag  = np.array([]), 0
+        self.episode_areas, self.avg_areas = np.array([]), 0
+        self.episode_lifts, self.avg_lifts = np.array([]), 0
         self.episode_reward = 0
         self.initialized_visualization = False
 
@@ -741,6 +741,8 @@ class Env2DCylinderModified(gym.Env):
             avg_drag = np.average(self.episode_drags[len(self.episode_drags)//2:])
             avg_area = np.average(self.episode_areas[len(self.episode_areas)//2:])
             avg_lift = np.average(self.episode_lifts[len(self.episode_lifts)//2:])
+            
+            self.avg_drag, self.avg_area, self.avg_lift = avg_drag, avg_area, avg_lift
 
             name = f'{self.env_number}_output.csv'
             if(not os.path.exists(self.output_filename+"saved_models")):
