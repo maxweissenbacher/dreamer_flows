@@ -6,6 +6,7 @@ sys.path.append(parent_dir)
 import warnings
 import dreamerv3
 from dreamerv3 import embodied
+import wandb
 
 def main(keyword_args):
 
