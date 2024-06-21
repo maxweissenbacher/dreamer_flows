@@ -1,3 +1,4 @@
+#NOTE: Parallel Eval_env not implemented. Only for use for Cylinder flow
 import re
 
 import embodied
@@ -98,9 +99,14 @@ def train_eval_rollout_noevalreplay(
     if should_log(step):
       logger.add(metrics.result())
       logger.add(agent.report(batch[0]), prefix='report')
-      # with timer.scope('dataset_eval'):
-      #   eval_batch = next(dataset_eval)
-      # logger.add(agent.report(eval_batch), prefix='eval')
+      if args.log_specificenv_data !='':
+        se_keys = args.log_specificenv_data.split(",")
+        for key in se_keys:
+          logger.add({key.strip(): getattr(actual_env, key.strip())})
+      if args.log_specificenv_data !='':
+        se_keys = args.log_specificenv_data.split(",")
+        for key in se_keys:
+          logger.add({key.strip(): getattr(actual_env, key.strip())}, prefix='rollout_eval_episode')   
       logger.add(train_replay.stats, prefix='replay')
       # logger.add(eval_replay.stats, prefix='eval_replay')
       logger.add(timer.stats(), prefix='timer')
@@ -135,17 +141,19 @@ def train_eval_rollout_noevalreplay(
 
       while eval_eps_index < args.eval_eps:
         driver_eval(policy_eval, steps = args.eval_rollout_steps)
-        # logger.add(metrics.result())
-        # logger.add(timer.stats(), prefix='timer')
-        # logger.write(fps=True)
-        # logger.write()
+        
         eval_eps_index+=1
       #calculating and logging mean reward for eval episode
       eval_eps_reward = np.array(metrics.get_key("rollout_eval_episode/reward"))
       mean_eval_eps_reward = np.mean(eval_eps_reward)
       last_eval_eps_reward = eval_eps_reward[-1]
+            
       logger.add({'mean_reward': mean_eval_eps_reward, 'last_reward': last_eval_eps_reward}, prefix='rollout_eval_episode')
-
+      if args.log_specificenv_data !='':
+        se_keys = args.log_specificenv_data.split(",")
+        for key in se_keys:
+          logger.add({key.strip(): getattr(actual_env, key.strip())}, prefix='rollout_eval_episode')  
+          
     driver_train(policy_train, steps=100)
     if should_save(step):
       checkpoint.save()

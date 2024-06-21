@@ -49,6 +49,7 @@ defaults:
     log_keys_sum: '^$'
     log_keys_max: '^$'
     log_keys_eval: '(lift, drag)'
+    log_specificenv_data: 'episode_drags, love'
     from_checkpoint: ''
     sync_every: 10
     # actor_addr: 'tcp://127.0.0.1:5551'
@@ -136,6 +137,7 @@ defaults:
     dump_debug: 10
     eval_dump_vtu: False
     eval_dump_debug: 10
+    
     
 
 minecraft:
