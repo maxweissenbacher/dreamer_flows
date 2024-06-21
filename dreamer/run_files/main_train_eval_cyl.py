@@ -55,7 +55,7 @@ def main(keyword_args):
   print("Number of Envs: ", config.envs.amount)
   
   wandb.init(
-        project="dreamerKS_test",
+        project=config.wandb.project,
         name=config.logdir,
         # sync_tensorboard=True,,
         entity='why_are_all_the_good_names_taken_aaa',
@@ -119,6 +119,6 @@ def parse_model_size():
 if __name__ == '__main__':
   
 #   os.environ['LD_LIBRARY_PATH'] = '~/anaconda3/envs/dreamer_cyl2/lib/:$LD_LIBRARY_PATH'
-  os.system("echo $LD_LIBRARY_PATH")
+#  os.system("echo $LD_LIBRARY_PATH")
   keyword_args = parse_model_size()
   main(keyword_args)
