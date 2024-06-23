@@ -99,18 +99,23 @@ def train_eval_rollout_noevalreplay(
     if should_log(step):
       logger.add(metrics.result())
       logger.add(agent.report(batch[0]), prefix='report')
-      if args.log_specificenv_data !='':
-        se_keys = args.log_specificenv_data.split(",")
-        for key in se_keys:
-          logger.add({key.strip(): getattr(actual_env, key.strip())})
-      if args.log_specificenv_data !='':
-        se_keys = args.log_specificenv_data.split(",")
-        for key in se_keys:
-          logger.add({key.strip(): getattr(actual_env, key.strip())}, prefix='rollout_eval_episode')   
+      
+      #for plotting specific values from the env
+      # print("logging specific values")
+      # if args.log_specificenv_data !='':
+      #   actual_train_env = train_env.get_actual_env()
+      #   se_keys = args.log_specificenv_data.split(",")
+      #   for key in se_keys:
+      #     key = key.strip()
+      #     avg_key_val = np.mean(np.array([getattr(actual_train_env[i], key) \
+      #                                     for i in range(len(actual_train_env))]))
+      #     logger.add({key: avg_key_val}, prefix='train')  
+
       logger.add(train_replay.stats, prefix='replay')
       # logger.add(eval_replay.stats, prefix='eval_replay')
       logger.add(timer.stats(), prefix='timer')
       logger.write(fps=True)
+      print("Train step Done")
       
   driver_train.on_step(train_step)
 
@@ -129,34 +134,41 @@ def train_eval_rollout_noevalreplay(
       *args, mode='explore' if should_expl(step) else 'train')
   policy_eval = lambda *args: agent.policy(*args, mode='eval')
   while step < args.steps:
-    
+    print("step: ", step)
     if should_eval(step):
-
       print('Starting evaluation at step', int(step))
       driver_eval.reset()
       # driver_eval(policy_eval, episodes=max(len(eval_env), args.eval_eps))
-      
       #unrolling
       eval_eps_index = 0
 
       while eval_eps_index < args.eval_eps:
         driver_eval(policy_eval, steps = args.eval_rollout_steps)
-        
         eval_eps_index+=1
+        
       #calculating and logging mean reward for eval episode
       eval_eps_reward = np.array(metrics.get_key("rollout_eval_episode/reward"))
       mean_eval_eps_reward = np.mean(eval_eps_reward)
       last_eval_eps_reward = eval_eps_reward[-1]
             
       logger.add({'mean_reward': mean_eval_eps_reward, 'last_reward': last_eval_eps_reward}, prefix='rollout_eval_episode')
+      
+      #for calculating specific data fromt the env
       if args.log_specificenv_data !='':
+        actual_eval_env = eval_env.get_actual_env()
         se_keys = args.log_specificenv_data.split(",")
+        
         for key in se_keys:
-          logger.add({key.strip(): getattr(actual_env, key.strip())}, prefix='rollout_eval_episode')  
-          
+          key = key.strip()
+          avg_key_val = np.mean(np.array([getattr(actual_eval_env[i], key) \
+                                          for i in range(len(actual_eval_env))]))
+          logger.add({key: avg_key_val}, prefix='rollout_eval_episode')
+          # logger.add({key: getattr(actual_eval_env, key}, prefix='rollout_eval_episode')  
+      logger.write()
+      print("Eval step done")
     driver_train(policy_train, steps=100)
     if should_save(step):
       checkpoint.save()
   logger.write()
-  logger.write()
+  # logger.write()
 

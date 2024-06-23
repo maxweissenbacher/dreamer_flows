@@ -45,7 +45,11 @@ class BatchEnv(base.Env):
         pass
   
   def get_actual_env(self):
-    if len(self._envs) == 1:
-      return self._envs[0].get_actual_env()
-    else:
-      print("Too many envs to return")
+    
+    actual_envs = [self._envs[i].get_actual_env() for i in range(len(self._envs))]
+    return actual_envs
+    # if len(self._envs) == 1:
+    #   return self._envs[0].get_actual_env()
+    # else:
+    #   return
+    #   print("Too many envs to return")

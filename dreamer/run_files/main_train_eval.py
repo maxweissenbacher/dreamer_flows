@@ -15,15 +15,15 @@ def main(keyword_args):
 
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
-  config = config.update(dreamerv3.configs['small'])
+  config = config.update(dreamerv3.configs['large'])
 #   config = config.update(dreamerv3.configs['medium'])
   # config = config.update(dreamerv3.configs['multicpu'])
 
   config = config.update({
   'run.eval_every': 4000, 
-  'run.train_ratio': 64,
+  'run.train_ratio': 128,
   'run.log_every': 30,  # seconds
-  'batch_size': 16,
+  'batch_size': 64,
   'batch_length': 64,
   'jax.prealloc': False,
     

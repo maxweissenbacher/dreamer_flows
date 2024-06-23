@@ -1,4 +1,4 @@
-#not working yet
+#working 
 import sys, os
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
@@ -7,6 +7,9 @@ import warnings
 import dreamerv3
 from dreamerv3 import embodied
 import wandb
+
+import os
+
 
 def main(keyword_args):
 
@@ -22,8 +25,8 @@ def main(keyword_args):
   'run.eval_every': 4000, 
   'run.train_ratio': 32,#64,
   'run.log_every': 30,  # seconds
-  'batch_size': 8,#16,
-  'batch_length': 8,#64,
+  'batch_size': 16,
+  'batch_length': 64,
   'jax.prealloc': False,
     
   # 'rssm.deter': 128,
@@ -72,6 +75,7 @@ def main(keyword_args):
             logdir=logdir,
             project=config.wandb.project,
             entity=config.wandb.entity,
+            # mode = "offline",
             config=config
         )
       # embodied.logger.MLFlowOutput(logdir.name),
@@ -117,7 +121,7 @@ def parse_model_size():
     return keyword_args
 
 if __name__ == '__main__':
-  
+
 #   os.environ['LD_LIBRARY_PATH'] = '~/anaconda3/envs/dreamer_cyl2/lib/:$LD_LIBRARY_PATH'
 #  os.system("echo $LD_LIBRARY_PATH")
   keyword_args = parse_model_size()

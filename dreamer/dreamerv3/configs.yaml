@@ -30,13 +30,13 @@ defaults:
     steps: 1e10
     expl_until: 0
     log_every: 30
-    save_every: 900
+    save_every: 3000
     
-    eval_every: 20
+    eval_every: 1000
     eval_initial: True
     eval_eps: 1
-    eval_rollout_steps: 100    #added by Priyam
-    num_eval_rollouts : 10 #added by Priyam
+    eval_rollout_steps: 150    #added by Priyam
+    num_eval_rollouts : 10 #added by Priyam 
     num_eval_envs: 2 #added by Priyam
     
     eval_samples: 1
@@ -49,7 +49,7 @@ defaults:
     log_keys_sum: '^$'
     log_keys_max: '^$'
     log_keys_eval: '(lift, drag)'
-    log_specificenv_data: 'episode_drags, love'
+    log_specificenv_data: 'avg_drag, avg_lift, avg_area'   #only for cylinder flow for now
     from_checkpoint: ''
     sync_every: 10
     # actor_addr: 'tcp://127.0.0.1:5551'
@@ -116,7 +116,7 @@ defaults:
 
   # Wandb parameters
   wandb:
-    project: 'dreamerKS_compare_num_envs'
+    project: 'Test'
     entity: 'why_are_all_the_good_names_taken_aaa'
 
   KS:
@@ -129,8 +129,8 @@ defaults:
   
   cyl: 
     horizon: 200
-    simulation_duration: 50
-    random_start: True    #number of timesteps before starting the control to start in between the vortex 
+    simulation_duration: 100
+    random_start: True     #number of timesteps before starting the control to start in between the vortex 
                           #True for random number timesteps
                           #positive integer value for specific number of timesteps
     dump_vtu: False
@@ -159,7 +159,7 @@ dmlab:
   envs.amount: 8
   encoder: {mlp_keys: '$^', cnn_keys: 'image'}
   decoder: {mlp_keys: '$^', cnn_keys: 'image'}
-  run.train_ratio: 64
+  run.train_ratio: 16
 
 atari:
 
