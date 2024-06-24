@@ -43,10 +43,7 @@ def main(keyword_args):
      
   
   config.save(config.logdir+"/config.yaml")
-  print("##########################################")
-  print('LOGDIR', config.logdir)
-  print("Number of Envs: ", config.envs.amount)
-  print("##########################################")
+  
 
   # ############################ Creating logger ##############################
   # wandb.init(
