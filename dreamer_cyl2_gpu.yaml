@@ -1,4 +1,4 @@
-name: dreamer_cyl2_gpu
+name: dreamer_cyl2_gpu3
 channels:
   - conda-forge
   - defaults
@@ -249,4 +249,4 @@ dependencies:
       - werkzeug==3.0.3
       - wrapt==1.16.0
       - zipp==3.18.2
-prefix: /home/pg221/miniconda3/envs/dreamer_cyl2_gpu
+prefix: /home/pg221/miniconda3/envs/dreamer_cyl2_gpu3

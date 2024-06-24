@@ -118,6 +118,7 @@ defaults:
   wandb:
     project: 'Test'
     entity: 'why_are_all_the_good_names_taken_aaa'
+    mode: offline
 
   KS:
     max_episode_steps: 500

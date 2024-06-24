@@ -18,7 +18,7 @@ def main(keyword_args):
 
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
-  config = config.update(dreamerv3.configs['small'])
+  config = config.update(dreamerv3.configs['large'])
   # config = config.update(dreamerv3.configs['multicpu'])
 
   config = config.update({
@@ -39,7 +39,7 @@ def main(keyword_args):
   'encoder.cnn_keys': '$^',
   'decoder.cnn_keys': '$^',
         
-  'model_opt.lr': 1e-4,
+  'model_opt.lr': 3e-4,
     
   'jax.platform': 'cpu',
   'wrapper.length': 0,
@@ -53,17 +53,20 @@ def main(keyword_args):
   config = config.update({'logdir': logdir_name})
   logdir = embodied.Path(config.logdir)
   logdir.mkdirs()
-  config.save(config.logdir+"/config.yaml")
-  print('Logdir', logdir)
-  print("Number of Envs: ", config.envs.amount)
   
-  wandb.init(
-        project=config.wandb.project,
-        name=config.logdir,
-        # sync_tensorboard=True,,
-        entity='why_are_all_the_good_names_taken_aaa',
-        config=dict(config),
-    )
+  config.save(config.logdir+"/config.yaml")
+  print("##########################################")
+  print('LOGDIR', config.logdir)
+  print("Number of Envs: ", config.envs.amount)
+  print("##########################################")
+  
+#   wandb.init(
+#         project=config.wandb.project,
+#         name=config.logdir,
+#         # sync_tensorboard=True,,
+#         entity='why_are_all_the_good_names_taken_aaa',
+#         config=dict(config),
+#     )
 
   step = embodied.Counter()
   logger = embodied.Logger(step, [
@@ -73,11 +76,16 @@ def main(keyword_args):
       embodied.logger.WandBOutput(
             pattern="$",
             logdir=logdir,
-            project=config.wandb.project,
-            entity=config.wandb.entity,
-            # mode = "offline",
-            config=config
+            config=config,
         )
+    #   embodied.logger.WandBOutput(
+    #         pattern="$",
+    #         logdir=logdir,
+    #         project=config.wandb.project,
+    #         entity=config.wandb.entity,
+    #         # mode = "offline",
+    #         config=config
+    #     )
       # embodied.logger.MLFlowOutput(logdir.name),
   ])
   
