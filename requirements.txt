@@ -1,10 +1,10 @@
 cloudpickle
-gym
-jax
+gym==0.25.0
 numpy
 optax
 rich
 ruamel.yaml
 tensorflow
-tensorflow_probability
+tensorflow_probability[tf]
 matplotlib
+wandb
