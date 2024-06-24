@@ -232,10 +232,11 @@ class WandBOutput:
     self._pattern = re.compile(pattern)
     import wandb
     wandb.init(
-        project=project,
+        project=config.wandb.project,
         name=logdir.name,
         # sync_tensorboard=True,,
-        entity=entity,
+        entity=config.wandb.entity,
+        mode=config.wandb.mode,
         config=dict(config),
     )
     self._wandb = wandb

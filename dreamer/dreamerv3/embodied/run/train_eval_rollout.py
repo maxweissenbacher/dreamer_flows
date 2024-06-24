@@ -24,8 +24,6 @@ def train_eval_rollout(
   timer = embodied.Timer()
   timer.wrap('agent', agent, ['policy', 'train', 'report', 'save'])
   timer.wrap('env', train_env, ['step'])
-  # timer.wrap('replay', replay, ['add', 'save'])
-  timer.wrap('logger', logger, ['write'])
   if hasattr(train_replay, '_sample'):
     timer.wrap('replay', train_replay, ['_sample'])
 
@@ -169,11 +167,45 @@ def train_eval_rollout(
       # mean_eval_eps_reward = np.mean(eval_eps_reward)
       # last_eval_eps_reward = eval_eps_reward[-1]
       # logger.add({'mean_reward': mean_eval_eps_reward, 'last_reward': last_eval_eps_reward}, prefix='rollout_eval_episode')
-
+    
     driver_train(policy_train, steps=100)
     if should_save(step):
       checkpoint.save()
+
+    """
+    if int(step) % 1e9 == 1e5:
+      print(f"\n\n\n\n Checkpointing extra checkpoint now \n\n\n\n")
+      checkpoint_2 = embodied.Checkpoint(logdir / f"step_{int(step)}" / 'checkpoint.ckpt')
+      checkpoint_2.step = step
+      checkpoint_2.agent = agent
+      checkpoint_2.train_replay = train_replay
+      checkpoint_2.eval_replay = eval_replay
+      checkpoint_2.save()
+    """
+
   logger.write()
-  logger.write()
+  # logger.write()
   
- 
+  #non ensemble eval method
+  # if should_eval(step):
+
+  #     print('Starting evaluation at step', int(step))
+  #     driver_eval.reset()
+  #     # driver_eval(policy_eval, episodes=max(len(eval_env), args.eval_eps))
+      
+  #     #unrolling
+  #     eval_eps_index = 0
+
+  #     while eval_eps_index < args.eval_eps:
+  #       driver_eval(policy_eval, steps = args.eval_steps)
+  #       # logger.add(metrics.result())
+  #       # logger.add(timer.stats(), prefix='timer')
+  #       # logger.write(fps=True)
+  #       # logger.write()
+  #       eval_eps_index+=1
+  #     #calculating and logging mean reward for eval episode
+  #     eval_eps_reward = np.array(metrics.get_key("rollout_eval_episode/reward"))
+  #     mean_eval_eps_reward = np.mean(eval_eps_reward)
+  #     last_eval_eps_reward = eval_eps_reward[-1]
+  #     logger.add({'mean_reward': mean_eval_eps_reward, 'last_reward': last_eval_eps_reward}, prefix='rollout_eval_episode')
+  

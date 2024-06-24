@@ -99,7 +99,7 @@ defaults:
   imag_horizon: 15
   imag_unroll: False
   horizon: 333
-  discount: 0.8
+  # discount: 0.8  # Max: I think this parameter is unused, and actually gamma = 1 - 1 / horizon (the parameter above)
   return_lambda: 0.95
   critic_slowreg: logprob
   slow_critic_update: 1
@@ -116,8 +116,9 @@ defaults:
 
   # Wandb parameters
   wandb:
-    project: 'Test'
+    project: 'dreamerKS_compare_num_envs'
     entity: 'why_are_all_the_good_names_taken_aaa'
+    mode: offline
 
   KS:
     max_episode_steps: 500
