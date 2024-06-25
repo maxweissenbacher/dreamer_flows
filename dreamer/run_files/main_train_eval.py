@@ -16,30 +16,16 @@ def main(keyword_args):
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
   config = config.update(dreamerv3.configs['large'])
-#   config = config.update(dreamerv3.configs['medium'])
-  # config = config.update(dreamerv3.configs['multicpu'])
-
   config = config.update({
-  'run.eval_every': 4000, 
-  'run.train_ratio': 128,
-  'run.log_every': 30,  # seconds
-  'batch_size': 64,
-  'batch_length': 64,
-  'jax.prealloc': False,
-    
-#   'rssm.deter': 2048,
-  #   '.*\.cnn_depth': 32
-#   '.*\.units': keyword_args["units"],
-#   '.*\.layers': keyword_args["layers"],
-    
+  # 'rssm.deter': 128,
+  # #   '.*\.cnn_depth': 32
+  # '.*\.units': keyword_args["units"],
+  # '.*\.layers': keyword_args["layers"],
   'encoder.mlp_keys': 'vector',
   'decoder.mlp_keys': 'vector',    
   'encoder.cnn_keys': '$^',
-  'decoder.cnn_keys': '$^',
-        
+  'decoder.cnn_keys': '$^',   
   'model_opt.lr': 1e-4,
-    
-  'jax.platform': 'cpu',
   'wrapper.length': 0,
   })
 
@@ -57,19 +43,16 @@ def main(keyword_args):
      
   
   config.save(config.logdir+"/config.yaml")
-  print("##########################################")
-  print('LOGDIR', config.logdir)
-  print("Number of Envs: ", config.envs.amount)
-  print("##########################################")
+  
 
-  ############################ Creating logger ##############################
-  wandb.init(
-        project="dreamerKS_test",
-        name=config.logdir,
-        # sync_tensorboard=True,,
-        entity='why_are_all_the_good_names_taken_aaa',
-        config=dict(config),
-    )
+  # ############################ Creating logger ##############################
+  # wandb.init(
+  #       project="dreamerKS_test",
+  #       name=config.logdir,
+  #       # sync_tensorboard=True,,
+  #       entity='why_are_all_the_good_names_taken_aaa',
+  #       config=dict(config),
+  #   )
   
   step = embodied.Counter()
   logger = embodied.Logger(step, [
@@ -79,9 +62,7 @@ def main(keyword_args):
       embodied.logger.WandBOutput(
             pattern="$",
             logdir=logdir,
-            project=config.wandb.project,
-            entity=config.wandb.entity,
-            config=config
+            config=config,
         ),
       # embodied.logger.MLFlowOutput(logdir.name),
   ])

@@ -5,7 +5,7 @@ metadata:
  labels:
    kueue.x-k8s.io/queue-name: eidf079ns-user-queue
 spec:
- completions: 1
+ completions: 5
  parallelism: 1
  template:
   spec:
@@ -32,14 +32,26 @@ spec:
          # python -c "import jax; print('jax version', jax.__version__); from jax.lib import xla_bridge; print(xla_bridge.get_backend().platform)"
          python run_files/main_train_eval.py \
                --jax.platform gpu \
-               --envs.amount 1 \
-               --loss_scales.reward 10 \
+               --envs.amount 5 \
+               --loss_scales.reward 1.0 \
+               --loss_scales.vector 1.0 \
+               --loss_scales.cont 1.0 \
+               --loss_scales.dyn 1.0 \
+               --loss_scales.rep 0.1 \
+               --actent 3e-4 \
                --imag_horizon 15 \
+               --horizon 333 \
+               --return_lambda 0.95 \
                --batch_size 64 \
-               --run.train_ratio 64 \
+               --run.train_ratio 128 \
+               --run.steps 1_000_000 \
+               --run.eval_every 1_000 \
+               --KS.nu 0.05 \
+               --logdir_expname ks_H_50 \
+               --logdir_basepath ../../logdir \
                --logdir_dirname Experiments/ \
-               --logdir_expname ks_num_envs_1 \
-               --wandb.project dreamer_ks_compare_n_envs_2;
+               --wandb.mode online \
+               --wandb.project dreamer_HYPERPARAM_H;
      resources:
       requests:
        cpu: 8
