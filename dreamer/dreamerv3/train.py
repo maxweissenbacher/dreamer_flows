@@ -200,6 +200,7 @@ def wrap_env(env, config):
 
 
 def make_ks_env(config):
+  import gym
   from embodied.envs import from_gym
   from gym.wrappers.time_limit import TimeLimit
   from ks.KS_environment import KSenv

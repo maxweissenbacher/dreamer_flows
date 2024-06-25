@@ -90,6 +90,9 @@ class Wrapper:
       return getattr(self.env, name)
     except AttributeError:
       raise ValueError(name)
+  
+  def get_actual_env(self):
+    return self.env.get_actual_env()
 
 
 class Replay:

@@ -14,7 +14,7 @@ defaults:
   filter: '.*'
 
   jax:
-    platform: gpu
+    platform: cpu
     jit: True
     precision: float16
     prealloc: True
@@ -30,20 +30,26 @@ defaults:
     steps: 1e10
     expl_until: 0
     log_every: 30
-    save_every: 900
-    eval_every: 4000
+    save_every: 3000
+    
+    eval_every: 1000
     eval_initial: True
     eval_eps: 1
-    eval_steps: 100    #added by Priyam
+    eval_rollout_steps: 150    #added by Priyam
+    num_eval_rollouts : 10 #added by Priyam 
+    num_eval_envs: 2 #added by Priyam
+    
     eval_samples: 1
     train_ratio: 64
     train_fill: 0
     eval_fill: 0
     log_zeros: False
     log_keys_video: [image]
+    log_keys_mean: '^$'
     log_keys_sum: '^$'
-    log_keys_mean: '(log_entropy)'
     log_keys_max: '^$'
+    log_keys_eval: '(lift, drag)'
+    log_specificenv_data: 'avg_drag, avg_lift, avg_area'   #only for cylinder flow for now
     from_checkpoint: ''
     sync_every: 10
     # actor_addr: 'tcp://127.0.0.1:5551'
@@ -119,17 +125,21 @@ defaults:
     nu : 0.08
     num_actuators: 20 
     actuator_scale: 0.1
-    frame_skip: 1,
+    frame_skip: 1
     burn_in: 2000
   
   cyl: 
-    horizon: 100
-    random_start: 10    #number of timesteps before starting the control to start in between the vortex 
+    horizon: 200
+    simulation_duration: 100
+    random_start: True     #number of timesteps before starting the control to start in between the vortex 
                           #True for random number timesteps
                           #positive integer value for specific number of timesteps
     dump_vtu: False
-    dump_debug: False
-    simulation_duration: 50
+    dump_debug: 10
+    eval_dump_vtu: False
+    eval_dump_debug: 10
+    
+    
 
 minecraft:
 
@@ -150,7 +160,7 @@ dmlab:
   envs.amount: 8
   encoder: {mlp_keys: '$^', cnn_keys: 'image'}
   decoder: {mlp_keys: '$^', cnn_keys: 'image'}
-  run.train_ratio: 64
+  run.train_ratio: 16
 
 atari:
 

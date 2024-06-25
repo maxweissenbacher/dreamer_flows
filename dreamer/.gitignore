@@ -1,6 +1,7 @@
 .pytest_cache
 dist
 __pycache__/
+*.pyc
 *.py[cod]
 *.egg-info
 MUJOCO_LOG.TXT
@@ -9,9 +10,11 @@ logdir/*
 __pycache__
 Cylinder_Env/__pycache__/*
 Cylinder_Env/results/*
+Cylinder_Env/saved_models/*
 Cyl_output/results/*
 results/*
 ../Cylinder_Env/results/*
 core*
 .ipynb_checkpoints/*
+dreamer/eval_notebooks/*
 ;

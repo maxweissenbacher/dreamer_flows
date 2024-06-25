@@ -116,3 +116,6 @@ class FromGym(embodied.Env):
     if hasattr(space, 'n'):
       return embodied.Space(np.int32, (), 0, space.n)
     return embodied.Space(space.dtype, space.shape, space.low, space.high)
+  
+  def get_actual_env(self):
+    return self._env

@@ -32,8 +32,8 @@ def main(keyword_args):
   config = embodied.Flags(config).parse()
   
   logdir_name = config.logdir_basepath+'/'+\
-           config.logdir_dirname+'/'+\
-           config.logdir_expname
+                config.logdir_dirname+'/'+\
+                config.logdir_expname  
   config = config.update({'logdir': logdir_name})
   logdir = embodied.Path(config.logdir)
   logdir.mkdirs()
@@ -43,10 +43,17 @@ def main(keyword_args):
      
   
   config.save(config.logdir+"/config.yaml")
-  print('Logdir', logdir)
-  print("Number of Envs: ", config.envs.amount)
+  
 
-  ############################ Creating logger ##############################  
+  # ############################ Creating logger ##############################
+  # wandb.init(
+  #       project="dreamerKS_test",
+  #       name=config.logdir,
+  #       # sync_tensorboard=True,,
+  #       entity='why_are_all_the_good_names_taken_aaa',
+  #       config=dict(config),
+  #   )
+  
   step = embodied.Counter()
   logger = embodied.Logger(step, [
       embodied.logger.TerminalOutput(),
@@ -69,15 +76,14 @@ def main(keyword_args):
   
   #make env
   # env = make_ks_env(config) 
-  # from make_flow_envs import make_flow_envs
-  # env = make_flow_envs(config, env_name="KS")
-
-  train_env = dreamerv3.make_parallel_ks_envs(config)
+  from make_flow_envs import make_flow_envs, make_ks_env
+  env = make_flow_envs(config, env_name="KS", num_envs = config.envs.amount)
+  eval_env = make_flow_envs(config, env_name="KS", num_envs = config.run.num_eval_envs)
   
-  eval_env = dreamerv3.make_ks_env(config)
-  eval_env = embodied.BatchEnv([eval_env], parallel=False)
+  # eval_env = dreamerv3.make_ks_env(config)  # mode='eval'
+  # eval_env = embodied.BatchEnv([eval_env], parallel=False)
 
-  agent = dreamerv3.Agent(train_env.obs_space, train_env.act_space, step, config)
+  agent = dreamerv3.Agent(env.obs_space, env.act_space, step, config)
   args = embodied.Config(
       **config.run, logdir=config.logdir,
       batch_steps=config.batch_size * config.batch_length)
@@ -85,10 +91,10 @@ def main(keyword_args):
     
   ########################### Run Training or eval ##############################
   embodied.run.train_eval_rollout(
-          agent, train_env, eval_env, replay, eval_replay, logger, args)
+          agent, env, eval_env, replay, eval_replay, logger, args)
 
   #eval_only
-  # embodied.run.eval_only(agent, train_env, logger, args)
+  # embodied.run.eval_only(agent, env, logger, args)
 
 def parse_model_size():
     #for parsing model size from terminal

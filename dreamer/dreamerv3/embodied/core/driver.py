@@ -80,8 +80,9 @@ class Driver:
           ep = {k: convert(v) for k, v in self._eps[i].items()}
           [fn(ep.copy(), i, **self._kwargs) for fn in self._on_episodes]
           episode += 1
+    
     return step, episode
-
+  
   # 
   def _expand(self, value, dims):
     while len(value.shape) < dims:

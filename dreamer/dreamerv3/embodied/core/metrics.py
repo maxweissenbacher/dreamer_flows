@@ -50,4 +50,7 @@ class Metrics:
     else:
       print(f"{key} not in metric returning None")
       return None
+  
+  def get_metric_keys(self):    
+    return [*self._lasts.keys(), *self._scalars.keys()]
       
