@@ -164,7 +164,8 @@ def train_eval_rollout(
                   'std_rewards'       : std_eval_eps_rewards,
                   'mean_last_rewards' : last_eval_eps_rewards, 
                   'std_last_rewards'  : std_last_eval_eps_rewards}, prefix='rollout_eval_episode')
-      logger.add({f'last_reward_env{i}': eval_eps_rewards[i,-1]} for i in range(eval_eps_rewards.shape[0]))
+      for i in range(eval_eps_rewards.shape[0]):
+          logger.add({f'last_reward_env{i}': eval_eps_rewards[i,-1]})
 
       # eval_eps_reward = np.array(metrics.get_key("rollout_eval_episode/reward"))
       # mean_eval_eps_reward = np.mean(eval_eps_reward)
