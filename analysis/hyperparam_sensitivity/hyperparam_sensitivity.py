@@ -43,8 +43,8 @@ def load_config_from_wandb_project(path):
 
 if __name__ == '__main__':
     # Specify the WANDB project and the config key to the relevant hyperparameter here
-    hyperparam_str = 'imag_horizon'
-    project_path = "dreamer_HYPERPARAM_H"
+    hyperparam_str = 'envs.amount'
+    project_path = "dreamer_HYPERPARAM_nenv"
 
     # Load everything
     cfg = load_config_from_wandb_project(path=project_path)
@@ -111,12 +111,14 @@ if __name__ == '__main__':
     for param in hyperparams:
         final_rewards.append(np.mean(Z_reward[(param, "mean")][-num:]))
         final_last_rewards.append(np.mean(Z_last_reward[(param, "mean")][-num:]))
+    final_rewards = np.asarray(final_rewards)
+    final_last_rewards = np.asarray(final_last_rewards)
 
-    gap_reward = (np.max(final_rewards)-np.min(final_rewards))/np.mean(final_rewards)
-    gap_last_reward = (np.max(final_last_rewards)-np.min(final_last_rewards))/np.mean(final_last_rewards)
+    gap_reward = np.max(np.abs((final_rewards-np.mean(final_rewards))/np.mean(final_rewards)))
+    gap_last_reward = np.max(np.abs((final_last_rewards-np.mean(final_last_rewards))/np.mean(final_last_rewards)))
 
-    print("Final rewards", sorted(final_rewards), "MEAN", np.mean(final_rewards), "GAP", gap_reward)
-    print("Final last rewards", sorted(final_last_rewards), "MEAN", np.mean(final_last_rewards), "GAP", gap_last_reward)
+    print(f"Final rewards are within {gap_reward*100:.2f}% of the mean")
+    print(f"Final last rewards are within {gap_last_reward * 100:.2f}% of the mean")
 
     # Line plots as a function of time
     for param in hyperparams:
