@@ -1,0 +1,71 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+ generateName: dreamer-cyl-
+ labels:
+   kueue.x-k8s.io/queue-name: eidf079ns-user-queue
+spec:
+ completions: 1
+ parallelism: 1
+ template:
+  spec:
+   restartPolicy: Never
+   containers:
+   - name: jax-con
+     image: nvcr.io/nvidia/jax:24.04-py3
+     volumeMounts:
+      - mountPath: /dev/shm
+        name: dshm
+     command: [/bin/bash, -c, --]
+     args: 
+       - |
+         export OMP_NUM_THREADS=1;
+         mkdir build;
+         cd build;
+         apt update; apt upgrade -y; apt install git vim -y;
+         ####################
+         # Install miniconda
+         ####################
+         mkdir -p ~/miniconda3
+         wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+         bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+         rm -rf ~/miniconda3/miniconda.sh
+         ####################
+         # Initialise Conda
+         ####################
+         source ~/.bashrc
+         ~/miniconda3/bin/conda init bash
+         ####################
+         # Install tzdata (required for fenics)
+         ####################
+         DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata;
+         #### Fenics may also be installed via apt but this did not work for me, despite not throwing an error message
+         # apt-get install software-properties-common -y; apt-get update;
+         # add-apt-repository ppa:fenics-packages/fenics; apt update;
+         # apt install fenicsx -y;
+         ####################
+         # Set up Conda env
+         ####################
+         conda create -n env -c conda-forge fenics python=3.10.6
+         conda activate env
+         git clone https://github.com/maxweissenbacher/dreamer_flows.git;
+         cd dreamer_flows;
+         ####################
+         # Test if Python can load Fenics
+         ####################
+         python -c "import fenics; print('Imported FENICS')"
+         # python -c "import jax; print('jax version', jax.__version__); from jax.lib import xla_bridge; print(xla_bridge.get_backend().platform)"
+     resources:
+      requests:
+       cpu: 8
+       memory: "64Gi"
+      limits:
+       cpu: 8
+       memory: "64Gi"
+       nvidia.com/gpu: 1
+   nodeSelector:
+    nvidia.com/gpu.product: NVIDIA-A100-SXM4-40GB
+   volumes:
+   - name: dshm
+     emptyDir:
+      medium: Memory
