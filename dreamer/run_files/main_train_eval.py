@@ -79,8 +79,8 @@ def main(keyword_args):
       embodied.logger.WandBOutput(
             pattern="$",
             logdir=logdir,
-            project=config.wandb.project,
-            entity=config.wandb.entity,
+            # project=config.wandb.project,
+            # entity=config.wandb.entity,
             config=config
         ),
       # embodied.logger.MLFlowOutput(logdir.name),

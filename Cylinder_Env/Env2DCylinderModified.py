@@ -1159,6 +1159,9 @@ class Env2DCylinderModified(gym.Env):
         else:
             raise RuntimeError("Reward function {} not yet implemented".format(self.reward_function))
 
+    def get_Cd(self):
+        -2*self.history_parameters["drag"].get()[-1]
+        
     def save_wake_ob(self, next_wake_ob):
         # Use the probe setup same as 'inflow64' for collecting the wake statistics
         name = "wake_ob.csv"
@@ -1175,7 +1178,7 @@ class Env2DCylinderModified(gym.Env):
                 spam_writer = csv.writer(csv_state, delimiter=";", lineterminator="\n")
                 for v in next_wake_ob:
                     spam_writer.writerow([self.episode_number, self.solver_step, v])
-                        
+    
     def save_state(self, next_state):
 
         name = "state.csv"
