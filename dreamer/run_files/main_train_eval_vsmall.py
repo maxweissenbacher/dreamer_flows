@@ -15,7 +15,7 @@ def main(keyword_args):
 
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
-  config = config.update(dreamerv3.configs['vsmall'])
+  config = config.update(dreamerv3.configs['small'])
   config = config.update({
   # 'rssm.deter': 128,
   # #   '.*\.cnn_depth': 32
