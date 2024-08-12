@@ -231,24 +231,27 @@ class WorldModel(nj.Module):
         step, jnp.arange(horizon), start, self.config.imag_unroll)
     traj = {
         k: jnp.concatenate([start[k][None], v], 0) for k, v in traj.items()}
-    # cont = self.heads['cont'](traj).mode()
-    # cont = jax.numpy.ones_like(self.heads['cont'](traj).mode())  #added by Priyam
-    cont = self.cont_switch(self.config.use_cont, traj)
-    print("cont: ", cont)
+    
+    #decides whether to use continuity model or not
+    if self.config.use_cont:
+      cont = self.heads['cont'](traj).mode()
+    else:
+      cont = jax.numpy.ones_like(self.heads['cont'](traj).mode())  #added by Priyam
+      
     traj['cont'] = jnp.concatenate([first_cont[None], cont[1:]], 0)
     discount = 1 - 1 / self.config.horizon
     traj['weight'] = jnp.cumprod(discount * traj['cont'], 0) / discount
     return traj
 
-  def true_cont(self, traj):
-    print("Executing true branch")
-    return self.heads['cont'](traj).mode()
-  def false_cont(self, traj):
-    print("Executing False branch")
-    return jax.numpy.ones_like(self.heads['cont'](traj).mode())
-  def cont_switch(self, condition, traj):
-    '''added by Priyam.... if condition for jax for cont'''
-    return jax.lax.cond(condition, self.true_cont, self.false_cont, traj)
+  # def true_cont(self, traj):
+  #   print("Executing true branch")
+  #   return self.heads['cont'](traj).mode()
+  # def false_cont(self, traj):
+  #   print("Executing False branch")
+  #   return jnp.ones_like(self.heads['cont'](traj).mode())
+  # def cont_switch(self, condition, traj):
+  #   '''added by Priyam.... if condition for jax for cont'''
+  #   return jax.lax.cond(condition, self.true_cont, self.false_cont, traj)
   
   def report(self, data):
     state = self.initial(len(data['is_first']))
