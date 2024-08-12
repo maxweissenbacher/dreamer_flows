@@ -58,7 +58,7 @@ class RSSM(nj.Module):
     inputs = swap(action), swap(embed), swap(is_first)
     start = state, state
     post, prior = jaxutils.scan(step, inputs, start, self._unroll)
-    post = {k: swap(v) for k, v in post.items()}
+    post  = {k: swap(v) for k, v in post.items()}
     prior = {k: swap(v) for k, v in prior.items()}
     return post, prior
 
@@ -67,8 +67,8 @@ class RSSM(nj.Module):
     state = self.initial(action.shape[0]) if state is None else state
     assert isinstance(state, dict), state
     action = swap(action)
-    prior = jaxutils.scan(self.img_step, action, state, self._unroll)
-    prior = {k: swap(v) for k, v in prior.items()}
+    prior  = jaxutils.scan(self.img_step, action, state, self._unroll)
+    prior  = {k: swap(v) for k, v in prior.items()}
     return prior
 
   def get_dist(self, state, argmax=False):
@@ -95,13 +95,13 @@ class RSSM(nj.Module):
     x = jnp.concatenate([prior['deter'], embed], -1)
     x = self.get('obs_out', Linear, **self._kw)(x)
     stats = self._stats('obs_stats', x)
-    dist = self.get_dist(stats)
+    dist  = self.get_dist(stats)
     stoch = dist.sample(seed=nj.rng())
-    post = {'stoch': stoch, 'deter': prior['deter'], **stats}
+    post  = {'stoch': stoch, 'deter': prior['deter'], **stats}
     return cast(post), cast(prior)
 
   def img_step(self, prev_state, prev_action):
-    prev_stoch = prev_state['stoch']
+    prev_stoch  = prev_state['stoch']
     prev_action = cast(prev_action)
     if self._action_clip > 0.0:
       prev_action *= sg(self._action_clip / jnp.maximum(
@@ -117,7 +117,7 @@ class RSSM(nj.Module):
     x, deter = self._gru(x, prev_state['deter'])
     x = self.get('img_out', Linear, **self._kw)(x)
     stats = self._stats('img_stats', x)
-    dist = self.get_dist(stats)
+    dist  = self.get_dist(stats)
     stoch = dist.sample(seed=nj.rng())
     prior = {'stoch': stoch, 'deter': deter, **stats}
     return cast(prior)

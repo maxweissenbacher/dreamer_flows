@@ -54,7 +54,7 @@ def scan(fn, inputs, start, unroll=True, modify=False):
   length = len(jax.tree_util.tree_leaves(inputs)[0])
   carrydef = jax.tree_util.tree_structure(start)
   carry = start
-  outs = []
+  outs  = []
   for index in range(length):
     carry, out = fn2(carry, tree_map(lambda x: x[index], inputs))
     flat, treedef = jax.tree_util.tree_flatten(out)
@@ -65,10 +65,8 @@ def scan(fn, inputs, start, unroll=True, modify=False):
       for i in range(len(outs[0]))]
   return carrydef.unflatten(outs)
 
-
 def symlog(x):
   return jnp.sign(x) * jnp.log(1 + jnp.abs(x))
-
 
 def symexp(x):
   return jnp.sign(x) * (jnp.exp(jnp.abs(x)) - 1)

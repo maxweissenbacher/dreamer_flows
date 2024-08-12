@@ -69,7 +69,7 @@ class Agent(nj.Module):
     elif mode == 'train':
       outs = task_outs
       outs['log_entropy'] = outs['action'].entropy()
-      outs['action'] = outs['action'].sample(seed=nj.rng())
+      outs['action']      = outs['action'].sample(seed=nj.rng())
     state = ((latent, outs['action']), task_state, expl_state)
     return outs, state
 
@@ -78,9 +78,11 @@ class Agent(nj.Module):
     metrics = {}
     data = self.preprocess(data)
     state, wm_outs, mets = self.wm.train(data, state)
+    print("wm_outs: ", wm_outs)
     metrics.update(mets)
     context = {**data, **wm_outs['post']}
     start = tree_map(lambda x: x.reshape([-1] + list(x.shape[2:])), context)
+
     _, mets = self.task_behavior.train(self.wm.imagine, start, context)
     metrics.update(mets)
     if self.config.expl_behavior != 'None':
@@ -182,37 +184,40 @@ class WorldModel(nj.Module):
     state = last_latent, last_action
     metrics = self._metrics(data, dists, post, prior, losses, model_loss)
     return model_loss.mean(), (state, out, metrics)
-
-  # def imagined_rollout(self, data, state):
-  #   embed = self.encoder(data)
-  #   prev_latent, prev_action = state
-  #   prev_actions = jnp.concatenate([
-  #       prev_action[:, None], data['action'][:, :-1]], 1)
-  #   post, prior = self.rssm.observe(
-  #       embed, prev_actions, data['is_first'], prev_latent)
-  #   dists = {}
-  #   feats = {**post, 'embed': embed}
-  #   for name, head in self.heads.items():
-  #     out = head(feats if name in self.config.grad_heads else sg(feats))
-  #     out = out if isinstance(out, dict) else {name: out}
-  #     dists.update(out)
-  #   losses = {}
-  #   losses['dyn'] = self.rssm.dyn_loss(post, prior, **self.config.dyn_loss)
-  #   losses['rep'] = self.rssm.rep_loss(post, prior, **self.config.rep_loss)
-  #   for key, dist in dists.items():
-  #     loss = -dist.log_prob(data[key].astype(jnp.float32))
-  #     assert loss.shape == embed.shape[:2], (key, loss.shape)
-  #     losses[key] = loss
-  #   scaled = {k: v * self.scales[k] for k, v in losses.items()}
-  #   model_loss = sum(scaled.values())
-  #   out = {'embed':  embed, 'post': post, 'prior': prior}
-  #   out.update({f'{k}_loss': v for k, v in losses.items()})
-  #   last_latent = {k: v[:, -1] for k, v in post.items()}
-  #   last_action = data['action'][:, -1]
-  #   state = last_latent, last_action
-  #   metrics = self._metrics(data, dists, post, prior, losses, model_loss)
-  #   return model_loss.mean(), (state, out, metrics)
+  
+  #######################################################################################
+  def model_rollout(self, data, state, horizon):
     
+    #calculate encoded data
+    embed = self.encoder(data)
+    prev_latent, prev_action = state
+    prev_actions = jnp.concatenate([
+        prev_action[:, None], data['action'][:, :-1]], 1)
+    post, prior = self.rssm.observe(
+        embed, prev_actions, data['is_first'], prev_latent)
+    dists = {}
+    feats = {**post, 'embed': embed}
+    for name, head in self.heads.items():
+      out = head(feats if name in self.config.grad_heads else sg(feats))
+      out = out if isinstance(out, dict) else {name: out}
+      dists.update(out)
+    
+    out = {'embed':  embed, 'post': post, 'prior': prior}
+
+    last_latent = {k: v[:, -1] for k, v in post.items()}
+    last_action = data['action'][:, -1]
+    state = last_latent, last_action
+    
+    #imagine rollout
+    context = {**data, **outs['post']}
+    start = tree_map(lambda x: x.reshape([-1] + list(x.shape[2:])), context)
+    # print("start:", start)
+    traj = self.wm.imagine(policy, start, horizon)
+    _, mets = self.task_behavior.train(self.wm.imagine, start, context)
+    
+    return (state, out)
+  
+  ################################################################################
   def imagine(self, policy, start, horizon):
     first_cont = (1.0 - start['is_terminal']).astype(jnp.float32)
     keys = list(self.rssm.initial(1).keys())
@@ -226,12 +231,25 @@ class WorldModel(nj.Module):
         step, jnp.arange(horizon), start, self.config.imag_unroll)
     traj = {
         k: jnp.concatenate([start[k][None], v], 0) for k, v in traj.items()}
-    cont = self.heads['cont'](traj).mode()
+    # cont = self.heads['cont'](traj).mode()
+    # cont = jax.numpy.ones_like(self.heads['cont'](traj).mode())  #added by Priyam
+    cont = self.cont_switch(self.config.use_cont, traj)
+    print("cont: ", cont)
     traj['cont'] = jnp.concatenate([first_cont[None], cont[1:]], 0)
     discount = 1 - 1 / self.config.horizon
     traj['weight'] = jnp.cumprod(discount * traj['cont'], 0) / discount
     return traj
 
+  def true_cont(self, traj):
+    print("Executing true branch")
+    return self.heads['cont'](traj).mode()
+  def false_cont(self, traj):
+    print("Executing False branch")
+    return jax.numpy.ones_like(self.heads['cont'](traj).mode())
+  def cont_switch(self, condition, traj):
+    '''added by Priyam.... if condition for jax for cont'''
+    return jax.lax.cond(condition, self.true_cont, self.false_cont, traj)
+  
   def report(self, data):
     state = self.initial(len(data['is_first']))
     report = {}

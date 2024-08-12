@@ -143,8 +143,6 @@ class Env2DCylinderModified(gym.Env):
         self.action_space = gym.spaces.Box(shape=(self.action_shape,), low=float(self.optimization_params["min_value_jet_MFR"]), high=float(self.optimization_params["max_value_jet_MFR"]))
         self.observation_space = gym.spaces.Box(shape=(self.state_shape,), low=-np.inf, high=np.inf)
 
-
-
         print("--- done buffers initialisation ---")
 
     def start_class(self):
@@ -887,7 +885,7 @@ class Env2DCylinderModified(gym.Env):
                  terminal
                  reward (check env.py and compute_reward() function for the reward used)
         '''
-        action = actions * 0.1 #scaled for torchrl purposes only, it takes max and min action value to be 1 and -1 respectively
+        action = actions*0.1 #scaled for torchrl purposes only, it takes max and min action value to be 1 and -1 respectively
                                #scaled for dreamer purposes as well
 
         if action is None:

@@ -36,7 +36,7 @@ defaults:
     eval_initial: True
     eval_eps: 1
     eval_rollout_steps: 150    #added by Priyam
-    num_eval_rollouts : 10 #added by Priyam 
+    num_eval_rollouts: 10 #added by Priyam 
     num_eval_envs: 2 #added by Priyam
     
     eval_samples: 1
@@ -75,6 +75,7 @@ defaults:
   data_loaders: 8
 
   # World Model
+  use_cont: True   #added by Priyam, True: original use of cont model, False: cont flags replaced by unity value
   grad_heads: [decoder, reward, cont]
   rssm: {deter: 4096, units: 1024, stoch: 32, classes: 32, act: silu, norm: layer, initial: learned, unimix: 0.01, unroll: False, action_clip: 1.0, winit: normal, fan: avg}
   encoder: {mlp_keys: '.*', cnn_keys: '.*', act: silu, norm: layer, mlp_layers: 5, mlp_units: 1024, cnn: resnet, cnn_depth: 96, cnn_blocks: 0, resize: stride, winit: normal, fan: avg, symlog_inputs: True, minres: 4}
@@ -99,7 +100,7 @@ defaults:
   imag_horizon: 15
   imag_unroll: False
   horizon: 333
-  # discount: 0.8  # Max: I think this parameter is unused, and actually gamma = 1 - 1 / horizon (the parameter above)
+  discount: 0.8  # Max: I think this parameter is unused, and actually gamma = 1 - 1 / horizon (the parameter above)
   return_lambda: 0.95
   critic_slowreg: logprob
   slow_critic_update: 1
@@ -195,7 +196,6 @@ atari100k:
   decoder: {mlp_keys: '$^', cnn_keys: 'image'}
 
 crafter:
-
   task: crafter_reward
   envs.amount: 1
   run:
@@ -206,7 +206,6 @@ crafter:
   decoder: {mlp_keys: '$^', cnn_keys: 'image'}
 
 dmc_vision:
-
   task: dmc_walker_walk
   run.train_ratio: 512
   rssm.deter: 512
@@ -217,7 +216,6 @@ dmc_vision:
   decoder: {mlp_keys: '$^', cnn_keys: 'image'}
 
 dmc_proprio:
-
   task: dmc_walker_walk
   run.train_ratio: 512
   rssm.deter: 512
@@ -228,7 +226,6 @@ dmc_proprio:
   decoder: {mlp_keys: '.*', cnn_keys: '$^'}
 
 bsuite:
-
   task: bsuite_mnist/0
   envs: {amount: 1, parallel: none}
   run:
@@ -240,7 +237,6 @@ bsuite:
   .*\.units: 512
 
 loconav:
-
   task: loconav_ant_maze_m
   env.loconav.repeat: 2
   run:
