@@ -36,8 +36,8 @@ defaults:
     eval_initial: True
     eval_eps: 1
     eval_rollout_steps: 150    #added by Priyam
-    num_eval_rollouts: 10 #added by Priyam 
-    num_eval_envs: 2 #added by Priyam
+    num_eval_rollouts: 20 #added by Priyam 
+    num_eval_envs: 5 #added by Priyam
     
     eval_samples: 1
     train_ratio: 64
