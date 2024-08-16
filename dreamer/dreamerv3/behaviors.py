@@ -11,7 +11,12 @@ from . import jaxutils
 class Greedy(nj.Module):
 
   def __init__(self, wm, act_space, config):
-    rewfn = lambda s: wm.heads['reward'](s).mean()[1:]
+    # print("Greedy:  ", wm.heads['reward'](s).mean())
+    if config.use_rewardmodel:
+      rewfn = lambda s: wm.heads['reward'](s).mean()[1:]
+    else:
+      rewfn = lambda s: wm.heads['reward'](s)[1:]   #added by Priyam to replace reward model with decoder
+
     if config.critic_type == 'vfunction':
       critics = {'extr': agent.VFunction(rewfn, config, name='critic')}
     else:

@@ -440,7 +440,6 @@ class MLP(nj.Module):
   def _out(self, name, shape, x):
     return self.get(f'dist_{name}', Dist, shape, **self._dist)(x)
 
-
 class Dist(nj.Module):
 
   def __init__(
@@ -697,3 +696,5 @@ def get_act(name):
     return getattr(jax.nn, name)
   else:
     raise NotImplementedError(name)
+
+

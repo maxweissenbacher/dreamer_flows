@@ -128,10 +128,13 @@ class WorldModel(nj.Module):
 
     self.encoder = nets.MultiEncoder(shapes, **config.encoder, name='enc')
     self.rssm = nets.RSSM(**config.rssm, name='rssm')
-    self.heads = {
-        'decoder': nets.MultiDecoder(shapes, **config.decoder, name='dec'),
-        'reward': nets.MLP((), **config.reward_head, name='rew'),
-        'cont': nets.MLP((), **config.cont_head, name='cont')}
+    self.heads = {'decoder': nets.MultiDecoder(shapes, **config.decoder, name='dec'),
+                  'cont': nets.MLP((), **config.cont_head, name='cont')}
+    if self.config.use_rewardmodel:
+      self.heads['reward'] = nets.MLP((), **config.reward_head, name='rew')
+    else:
+      self.heads['reward'] = self.direct_reward(self.heads['decoder'])
+
     self.opt = jaxutils.Optimizer(name='model_opt', **config.model_opt)
     scales = self.config.loss_scales.copy()
     image, vector = scales.pop('image'), scales.pop('vector')
@@ -139,15 +142,30 @@ class WorldModel(nj.Module):
     scales.update({k: vector for k in self.heads['decoder'].mlp_shapes})
     self.scales = scales
 
+  def direct_reward(self, decoder):
+    #added by Priyam only for dict x for now
+    def wrapper(inputs):
+        x = decoder(inputs)
+        x = jax.numpy.linalg.norm(x['vector'].mean(), axis=-1)**2
+        print("reward output: ", x)
+        return x
+    return wrapper
+  
   def initial(self, batch_size):
     prev_latent = self.rssm.initial(batch_size)
     prev_action = jnp.zeros((batch_size, *self.act_space.shape))
     return prev_latent, prev_action
 
   def train(self, data, state):
-    modules = [self.encoder, self.rssm, *self.heads.values()]
+    # modules = [self.encoder, self.rssm, *self.heads.values()]  #original code
+    
+    #select modules to optimize added by priyam
+    opt_modules = [self.encoder, self.rssm]
+    opt_modules.extend([self.heads[key] for key in self.heads.keys() \
+                        if key in self.config.grad_heads])
+    
     mets, (state, outs, metrics) = self.opt(
-        modules, self.loss, data, state, has_aux=True)
+        opt_modules, self.loss, data, state, has_aux=True)
     metrics.update(mets)
     return state, outs, metrics
 
@@ -170,9 +188,12 @@ class WorldModel(nj.Module):
     losses['rep'] = self.rssm.rep_loss(post, prior, **self.config.rep_loss)
     
     for key, dist in dists.items():
-      loss = -dist.log_prob(data[key].astype(jnp.float32))
-      assert loss.shape == embed.shape[:2], (key, loss.shape)
-      losses[key] = loss
+      if key == 'reward' and not self.config.use_rewardmodel:
+          pass
+      else:
+        loss = -dist.log_prob(data[key].astype(jnp.float32))
+        assert loss.shape == embed.shape[:2], (key, loss.shape)
+        losses[key] = loss
     scaled = {k: v * self.scales[k] for k, v in losses.items()}
     model_loss = sum(scaled.values())
     out = {'embed':  embed, 'post': post, 'prior': prior}
@@ -185,7 +206,7 @@ class WorldModel(nj.Module):
   
   #######################################################################################
   def model_rollout(self, data, state, horizon):
-    
+    #added by Priyam
     #calculate encoded data
     embed = self.encoder(data)
     prev_latent, prev_action = state
@@ -196,7 +217,7 @@ class WorldModel(nj.Module):
     dists = {}
     feats = {**post, 'embed': embed}
     for name, head in self.heads.items():
-      out = head(feats if name in self.config.grad_heads else sg(feats))
+      out = head(sg(feats))
       out = out if isinstance(out, dict) else {name: out}
       dists.update(out)
     
@@ -231,6 +252,7 @@ class WorldModel(nj.Module):
         k: jnp.concatenate([start[k][None], v], 0) for k, v in traj.items()}
     
     #decides whether to use continuity model or not
+    # cont = self.heads['cont'](traj).mode()
     if self.config.use_cont:
       cont = self.heads['cont'](traj).mode()
     else:
@@ -240,16 +262,6 @@ class WorldModel(nj.Module):
     discount = 1 - 1 / self.config.horizon
     traj['weight'] = jnp.cumprod(discount * traj['cont'], 0) / discount
     return traj
-
-  # def true_cont(self, traj):
-  #   print("Executing true branch")
-  #   return self.heads['cont'](traj).mode()
-  # def false_cont(self, traj):
-  #   print("Executing False branch")
-  #   return jnp.ones_like(self.heads['cont'](traj).mode())
-  # def cont_switch(self, condition, traj):
-  #   '''added by Priyam.... if condition for jax for cont'''
-  #   return jax.lax.cond(condition, self.true_cont, self.false_cont, traj)
   
   def report(self, data):
     state = self.initial(len(data['is_first']))
@@ -279,9 +291,10 @@ class WorldModel(nj.Module):
     metrics.update({f'{k}_loss_std': v.std() for k, v in losses.items()})
     metrics['model_loss_mean'] = model_loss.mean()
     metrics['model_loss_std'] = model_loss.std()
-    metrics['reward_max_data'] = jnp.abs(data['reward']).max()
-    metrics['reward_max_pred'] = jnp.abs(dists['reward'].mean()).max()
-    if 'reward' in dists and not self.config.jax.debug_nans:
+    if self.config.use_rewardmodel:
+      metrics['reward_max_data'] = jnp.abs(data['reward']).max()
+      metrics['reward_max_pred'] = jnp.abs(dists['reward'].mean()).max()
+    if 'reward' in dists and not self.config.jax.debug_nans and self.config.use_rewardmodel:
       stats = jaxutils.balance_stats(dists['reward'], data['reward'], 0.1)
       metrics.update({f'reward_{k}': v for k, v in stats.items()})
     if 'cont' in dists and not self.config.jax.debug_nans:

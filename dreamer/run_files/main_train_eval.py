@@ -30,7 +30,8 @@ def main(keyword_args):
   })
 
   config = embodied.Flags(config).parse()
-  
+  config = config.update({'grad_heads': gradcontrol(config)})
+  print("############# config gradhead: ", config.grad_heads)
   logdir_name = config.logdir_basepath+'/'+\
                 config.logdir_dirname+'/'+\
                 config.logdir_expname  
@@ -49,13 +50,6 @@ def main(keyword_args):
   print("##########################################")
   
   # ############################ Creating logger ##############################
-  # wandb.init(
-  #       project="dreamerKS_test",
-  #       name=config.logdir,
-  #       # sync_tensorboard=True,,
-  #       entity='why_are_all_the_good_names_taken_aaa',
-  #       config=dict(config),
-  #   )
   
   step = embodied.Counter()
   logger = embodied.Logger(step, [
@@ -109,6 +103,17 @@ def parse_model_size():
             key = key[5:]
             keyword_args[key] = value
     return keyword_args
+
+def gradcontrol(config):
+    grad_heads = ['decoder']
+    if config.use_rewardmodel:
+        grad_heads.append('reward')
+    if config.use_cont:
+        grad_heads.append('cont')
+    return grad_heads
+    
+        
+    
   
 if __name__ == '__main__':
   

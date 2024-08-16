@@ -76,6 +76,7 @@ defaults:
 
   # World Model
   use_cont: True   #added by Priyam, True: original use of cont model, False: cont flags replaced by unity value
+  use_rewardmodel: True
   grad_heads: [decoder, reward, cont]
   rssm: {deter: 4096, units: 1024, stoch: 32, classes: 32, act: silu, norm: layer, initial: learned, unimix: 0.01, unroll: False, action_clip: 1.0, winit: normal, fan: avg}
   encoder: {mlp_keys: '.*', cnn_keys: '.*', act: silu, norm: layer, mlp_layers: 5, mlp_units: 1024, cnn: resnet, cnn_depth: 96, cnn_blocks: 0, resize: stride, winit: normal, fan: avg, symlog_inputs: True, minres: 4}
