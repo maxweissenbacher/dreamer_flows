@@ -146,9 +146,7 @@ class WorldModel(nj.Module):
     #added by Priyam only for dict x for now
     def wrapper(inputs):
         x = decoder(inputs)
-        print("before norm x", x['vector'].mean())
-        reward = -jax.numpy.linalg.norm(x['vector'].mean(), axis=-1)**2
-        print("reward output: ", reward)
+        reward = -jax.numpy.linalg.norm(x['vector'].mean(), axis=-1)
         return reward
     return wrapper
   
