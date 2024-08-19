@@ -64,8 +64,8 @@ if __name__ == '__main__':
     plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'
 
     # Specify the WANDB project and the config key to the relevant hyperparameter here
-    project_path = "dreamer_GRIDSEARCH_H_nu004"
-    hyperparams = ['imag_horizon']
+    project_path = "dreamer_MODELSIZES_H_125_large"
+    hyperparams = ['KS.nu']
 
     # Load everything
     cfg = load_config_from_wandb_project(path=project_path)
@@ -127,18 +127,17 @@ if __name__ == '__main__':
         AUCS_mean + 1.96 * AUCS_std / np.sqrt(number_of_runs),
         alpha=0.3,
     )
-    plt.title(f"AUCs for nu={nu}")
+    plt.title(f"AUCs for H=125, large model")
     plt.xlabel(hyperparams[0])
+    plt.xscale('log')
     plt.xticks(param1, param1)
     # Add scatter plot for minimum
     plt.scatter(min_param1, AUCS_mean[min_idx[0]], color='red', marker='o')
-    plt.savefig(f"aucs_H_nu{str(nu).replace('.','-')}.png", dpi=300)
+    plt.savefig(f"aucs_H_125_model_large.png", dpi=300)
     plt.close()
 
     # SAVE DATAFRAME
-    df.to_csv(f"data_{str(nu).replace('.','-')}.csv", index=True)
-    with open(f"config_{str(nu).replace('.','-')}.pkl", 'wb') as f:
-        pickle.dump(cfg, f)
+    df.to_csv(f"data_H_125_model_large.csv", index=True)
 
     # Print summary
     print(f"The maximum number of repetitions for each hyperparameter is {number_of_runs}.")

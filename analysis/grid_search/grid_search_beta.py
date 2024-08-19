@@ -64,8 +64,8 @@ if __name__ == '__main__':
     plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'
 
     # Specify the WANDB project and the config key to the relevant hyperparameter here
-    project_path = "dreamer_GRIDSEARCH_H_nu004"
-    hyperparams = ['imag_horizon']
+    project_path = "dreamer_GRIDSEARCH_BETAVECTOR_nu0005"
+    hyperparams = ['loss_scales.vector']
 
     # Load everything
     cfg = load_config_from_wandb_project(path=project_path)
@@ -130,9 +130,10 @@ if __name__ == '__main__':
     plt.title(f"AUCs for nu={nu}")
     plt.xlabel(hyperparams[0])
     plt.xticks(param1, param1)
+    plt.xscale('log')
     # Add scatter plot for minimum
     plt.scatter(min_param1, AUCS_mean[min_idx[0]], color='red', marker='o')
-    plt.savefig(f"aucs_H_nu{str(nu).replace('.','-')}.png", dpi=300)
+    plt.savefig(f"aucs_beta_reward_nu{str(nu).replace('.','-')}.png", dpi=300)
     plt.close()
 
     # SAVE DATAFRAME

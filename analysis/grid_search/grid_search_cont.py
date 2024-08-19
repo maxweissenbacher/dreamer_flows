@@ -64,8 +64,8 @@ if __name__ == '__main__':
     plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'
 
     # Specify the WANDB project and the config key to the relevant hyperparameter here
-    project_path = "dreamer_GRIDSEARCH_H_nu004"
-    hyperparams = ['imag_horizon']
+    project_path = "dreamer_CHECK_CONT_PREDICTOR_nu008"
+    hyperparams = ['loss_scales.cont']
 
     # Load everything
     cfg = load_config_from_wandb_project(path=project_path)
@@ -83,10 +83,13 @@ if __name__ == '__main__':
     param1 = sorted(param1)
 
     # Extract mean and std error time series
+    AUCS = np.zeros((len(param1), 10))
     AUCS_mean = np.zeros((len(param1),))
     AUCS_std = np.zeros((len(param1),))
+    FINAL = np.zeros((len(param1), 10))
     FINAL_mean = np.zeros((len(param1),))
     FINAL_std = np.zeros((len(param1),))
+    FINAL_AVG = np.zeros((len(param1), 10))
     FINAL_AVG_mean = np.zeros((len(param1),))
     FINAL_AVG_std = np.zeros((len(param1),))
     window = 5
@@ -101,10 +104,13 @@ if __name__ == '__main__':
             auc = scipy.integrate.simpson(metric, axis=0)
             final_reward = np.mean(metric[-1, :])
             final_reward_avg = np.mean(metric[-window:, :], axis=0)
+            AUCS[i, :] = auc
             AUCS_mean[i] = np.nanmean(auc)
             AUCS_std[i] = np.nanstd(auc)
+            FINAL[i, :] = final_reward
             FINAL_mean[i] = np.nanmean(final_reward)
             FINAL_std[i] = np.nanstd(final_reward)
+            FINAL_AVG[i, :] = final_reward_avg
             FINAL_AVG_mean[i] = np.nanmean(final_reward_avg)
             FINAL_AVG_std[i] = np.nanstd(final_reward_avg)
         else:
@@ -116,23 +122,24 @@ if __name__ == '__main__':
             FINAL_AVG_std[i] = np.nan
 
     # ------ PLOTTING -----------
-    # Find the indices of the minimum value in AUCS
-    min_idx = np.unravel_index(np.argmin(AUCS_mean, axis=None), AUCS_mean.shape)
-    min_param1 = param1[min_idx[0]]
-    # Contour plot
-    plt.plot(param1, AUCS_mean)
-    plt.fill_between(
-        param1,
-        AUCS_mean - 1.96 * AUCS_std / np.sqrt(number_of_runs),
-        AUCS_mean + 1.96 * AUCS_std / np.sqrt(number_of_runs),
-        alpha=0.3,
-    )
+    plt.boxplot(AUCS.T, tick_labels=param1)
     plt.title(f"AUCs for nu={nu}")
-    plt.xlabel(hyperparams[0])
-    plt.xticks(param1, param1)
-    # Add scatter plot for minimum
-    plt.scatter(min_param1, AUCS_mean[min_idx[0]], color='red', marker='o')
-    plt.savefig(f"aucs_H_nu{str(nu).replace('.','-')}.png", dpi=300)
+    plt.xlabel("loss_scales.cont")
+    plt.savefig(f"aucs_beta_cont_nu{str(nu).replace('.','-')}.png", dpi=300)
+    plt.close()
+
+    # ------ PLOTTING -----------
+    plt.boxplot(FINAL.T, tick_labels=param1)
+    plt.title(f"Final rewards for nu={nu}")
+    plt.xlabel("loss_scales.cont")
+    plt.savefig(f"final_reward_beta_cont_nu{str(nu).replace('.', '-')}.png", dpi=300)
+    plt.close()
+
+    # ------ PLOTTING -----------
+    plt.boxplot(FINAL_AVG.T, tick_labels=param1)
+    plt.title(f"Final average rewards for nu={nu}")
+    plt.xlabel("loss_scales.cont")
+    plt.savefig(f"final_avg_reward_beta_cont_nu{str(nu).replace('.', '-')}.png", dpi=300)
     plt.close()
 
     # SAVE DATAFRAME
