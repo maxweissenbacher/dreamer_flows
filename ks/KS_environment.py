@@ -76,7 +76,7 @@ class KSenv(gym.Env):
         for i in range(self.frame_skip):  # Take frame_skip many steps
             u = self.solver_step(u, action)  # Take a step using the PDE solver
             # reward = - (L2 norm of solution + hyperparameter * L2 norm of action)
-            reward = -(np.linalg.norm(u-self.target, axis=-1)) #1 - 0.01*((np.linalg.norm(u-self.target, axis=-1)) - self.actuator_loss_weight * np.linalg.norm(action, axis=-1))
+            reward = -(np.linalg.norm(u-self.target, axis=-1))/np.sqrt(self.N) #1 - 0.01*((np.linalg.norm(u-self.target, axis=-1)) - self.actuator_loss_weight * np.linalg.norm(action, axis=-1))
             reward_sum += reward
         reward = reward_sum / self.frame_skip  # Compute the average reward over frame_skip steps
         #reward_mean = reward_mean.view(*tensordict.shape, 1)

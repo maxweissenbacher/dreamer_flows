@@ -15,12 +15,13 @@ def main(keyword_args):
 
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
-  config = config.update(dreamerv3.configs['large'])
+  config = config.update(dreamerv3.configs['small'])
   config = config.update({
   # 'rssm.deter': 128,
   # #   '.*\.cnn_depth': 32
   # '.*\.units': keyword_args["units"],
   # '.*\.layers': keyword_args["layers"],
+  'run.steps': 2e5,
   'encoder.mlp_keys': 'vector',
   'decoder.mlp_keys': 'vector',    
   'encoder.cnn_keys': '$^',
@@ -32,10 +33,24 @@ def main(keyword_args):
   config = embodied.Flags(config).parse()
   config = config.update({'grad_heads': gradcontrol(config)})
   print("############# config gradhead: ", config.grad_heads)
+  
+  #only for generalizability test
+#   config = config.update({'actor.layers': 2, 'actor.units': 32,
+#                           'critic.layers': 2, 'critic.units': 32,
+#                           'encoder.mlp_layers': 3, 'encoder.mlp_units': 512,
+#                           'decoder.mlp_layers': 3, 'decoder.mlp_units': 512,
+#                           'rssm.deter': 1024, 'rssm.units': 512
+#                           }
+#                          )
+  
   logdir_name = config.logdir_basepath+'/'+\
                 config.logdir_dirname+'/'+\
                 config.logdir_expname  
-  config = config.update({'logdir': logdir_name})
+                
+  if config.transfer_learning:
+    config = config.update({'logdir': logdir_name+"_"+config.logdir_transfer_info})
+  else:
+    config = config.update({'logdir': logdir_name})
   logdir = embodied.Path(config.logdir)
   logdir.mkdirs()
   

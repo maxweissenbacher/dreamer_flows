@@ -14,7 +14,7 @@ def train_eval_rollout(
   
   should_eval = embodied.when.Every(args.eval_every, args.eval_initial)
   should_sync = embodied.when.Every(args.sync_every)
-  step = logger.step
+  step    = logger.step
   updates = embodied.Counter()
   metrics = embodied.Metrics()
   # eval_metrics = embodied.Metrics()
@@ -120,7 +120,7 @@ def train_eval_rollout(
     checkpoint.load(args.from_checkpoint)
   checkpoint.load_or_save()
   should_save(step)  # Register that we jused saved.
-
+  
   print('Start training loop.')
   policy_train = lambda *args: agent.policy(
       *args, mode='explore' if should_expl(step) else 'train')
@@ -189,28 +189,6 @@ def train_eval_rollout(
     """
 
   logger.write()
-  # logger.write()
   
-  #non ensemble eval method
-  # if should_eval(step):
 
-  #     print('Starting evaluation at step', int(step))
-  #     driver_eval.reset()
-  #     # driver_eval(policy_eval, episodes=max(len(eval_env), args.eval_eps))
-      
-  #     #unrolling
-  #     eval_eps_index = 0
-
-  #     while eval_eps_index < args.eval_eps:
-  #       driver_eval(policy_eval, steps = args.eval_steps)
-  #       # logger.add(metrics.result())
-  #       # logger.add(timer.stats(), prefix='timer')
-  #       # logger.write(fps=True)
-  #       # logger.write()
-  #       eval_eps_index+=1
-  #     #calculating and logging mean reward for eval episode
-  #     eval_eps_reward = np.array(metrics.get_key("rollout_eval_episode/reward"))
-  #     mean_eval_eps_reward = np.mean(eval_eps_reward)
-  #     last_eval_eps_reward = eval_eps_reward[-1]
-  #     logger.add({'mean_reward': mean_eval_eps_reward, 'last_reward': last_eval_eps_reward}, prefix='rollout_eval_episode')
   
