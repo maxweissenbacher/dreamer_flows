@@ -141,6 +141,10 @@ class WorldModel(nj.Module):
     scales.update({k: image for k in self.heads['decoder'].cnn_shapes})
     scales.update({k: vector for k in self.heads['decoder'].mlp_shapes})
     self.scales = scales
+  
+  def reinit_optimizer(self):
+    print("Reinitializing World Model optimizer")
+    self.opt = jaxutils.Optimizer(name='model_opt', **self.config.model_opt)
 
   def direct_reward(self, decoder):
     #added by Priyam only for dict x for now
@@ -322,6 +326,10 @@ class ImagActorCritic(nj.Module):
         for k in critics}
     self.opt = jaxutils.Optimizer(name='actor_opt', **config.actor_opt)
 
+  def reinit_optimizer(self):
+    print("Reinitializing IAC optimizer")
+    self.opt = jaxutils.Optimizer(name='actor_opt', **self.config.actor_opt)
+    
   def initial(self, batch_size):
     return {}
 
@@ -393,6 +401,10 @@ class VFunction(nj.Module):
         self.net, self.slow,
         self.config.slow_critic_fraction,
         self.config.slow_critic_update)
+    self.opt = jaxutils.Optimizer(name='critic_opt', **self.config.critic_opt)
+  
+  def reinit_optimizer(self):
+    print("Reinitializing VFunction optimizer")
     self.opt = jaxutils.Optimizer(name='critic_opt', **self.config.critic_opt)
 
   def train(self, traj, actor):

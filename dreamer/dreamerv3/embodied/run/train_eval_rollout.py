@@ -121,6 +121,14 @@ def train_eval_rollout(
   checkpoint.load_or_save()
   should_save(step)  # Register that we jused saved.
   
+  if args.transfer_learning:
+    step.load(0)
+    agent.agent.wm.reinit_optimizer()
+    agent.agent.task_behavior.ac.reinit_optimizer()
+    agent.agent.expl_behavior.ac.reinit_optimizer()
+    agent.agent.task_behavior.ac.critics['extr'].reinit_optimizer()
+    
+  
   print('Start training loop.')
   policy_train = lambda *args: agent.policy(
       *args, mode='explore' if should_expl(step) else 'train')

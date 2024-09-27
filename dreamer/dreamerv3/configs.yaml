@@ -7,10 +7,11 @@ defaults:
   logdir_basepath: build
   logdir_expname: Test
   logdir_dirname: Test
+  logdir_info: ''
   logdir_eval: ''
   logdir_transfer_info: ''
-  transfer_learning: False
-
+  
+  
   replay: uniform
   replay_size: 1e6
   replay_online: False
@@ -35,6 +36,7 @@ defaults:
     expl_until: 0
     log_every: 30
     save_every: 3000
+    transfer_learning: False
     
     eval_every: 1000
     eval_initial: True
