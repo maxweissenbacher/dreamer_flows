@@ -19,41 +19,44 @@ def main(keyword_args):
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
   config = config.update(dreamerv3.configs['large'])
-  # config = config.update(dreamerv3.configs['multicpu'])
-
   config = config.update({
-  'run.eval_every': 4000, 
-  'run.train_ratio': 32,#64,
-  'run.log_every': 30,  # seconds
-  'batch_size': 16,
-  'batch_length': 64,
-  'jax.prealloc': False,
-    
   # 'rssm.deter': 128,
   # #   '.*\.cnn_depth': 32
-  '.*\.units': keyword_args["units"],
-  '.*\.layers': keyword_args["layers"],
-    
+  # '.*\.units': keyword_args["units"],
+  # '.*\.layers': keyword_args["layers"],
+  'run.steps': 2e5,
   'encoder.mlp_keys': 'vector',
   'decoder.mlp_keys': 'vector',    
   'encoder.cnn_keys': '$^',
-  'decoder.cnn_keys': '$^',
-        
-  'model_opt.lr': 3e-4,
-    
-  'jax.platform': 'cpu',
+  'decoder.cnn_keys': '$^',   
+  'model_opt.lr': 1e-5,
   'wrapper.length': 0,
   })
 
   config = embodied.Flags(config).parse()
+  config = config.update({'grad_heads': gradcontrol(config)})
+  print("############# config gradhead: ", config.grad_heads)
+  
+  #only for generalizability test
+#   config = config.update({'actor.layers': 2, 'actor.units': 32,
+#                           'critic.layers': 2, 'critic.units': 32,
+#                           'encoder.mlp_layers': 3, 'encoder.mlp_units': 512,
+#                           'decoder.mlp_layers': 3, 'decoder.mlp_units': 512,
+#                           'rssm.deter': 1024, 'rssm.units': 512
+#                           }
+#                          )
   
   logdir_name = config.logdir_basepath+'/'+\
-           config.logdir_dirname+'/'+\
-           config.logdir_expname
+                config.logdir_dirname+'/'+\
+                config.logdir_expname  
+                
   config = config.update({'logdir': logdir_name})
   logdir = embodied.Path(config.logdir)
   logdir.mkdirs()
   
+  # import os.path
+  # if os.path.isfile(config.logdir+"/config.yaml"):
+     
   config.save(config.logdir+"/config.yaml")
   print("##########################################")
   print('LOGDIR', config.logdir)
@@ -128,9 +131,18 @@ def parse_model_size():
             keyword_args[key] = value
     return keyword_args
 
+def gradcontrol(config):
+    grad_heads = ['decoder']
+    if config.use_rewardmodel:
+        grad_heads.append('reward')
+    if config.use_cont:
+        grad_heads.append('cont')
+    return grad_heads
+  
 if __name__ == '__main__':
 
 #   os.environ['LD_LIBRARY_PATH'] = '~/anaconda3/envs/dreamer_cyl2/lib/:$LD_LIBRARY_PATH'
 #  os.system("echo $LD_LIBRARY_PATH")
   keyword_args = parse_model_size()
   main(keyword_args)
+

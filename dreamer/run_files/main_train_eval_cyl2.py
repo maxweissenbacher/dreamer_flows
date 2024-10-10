@@ -82,15 +82,14 @@ def main(keyword_args):
   eval_replay = embodied.replay.Uniform(
                 config.batch_length, config.replay_size, logdir / 'eval_replay')
   
+  from make_flow_envs import make_flow_envs, make_cyl_env
+  env = make_flow_envs(config, env_name="CYL", num_envs = config.envs.amount)
+  eval_env = make_cyl_env(config, n_env=0, 
+                          sim_log_name = config.logdir_dirname+"/"+\
+                                         config.logdir_expname, mode = "eval")  # mode='eval'
+  eval_env = embodied.BatchEnv([eval_env], parallel=False)
   #make env
-  # env = make_ks_env(config) 
-  from make_flow_envs import make_flow_envs, make_ks_env
-  env = make_flow_envs(config, env_name="KS", num_envs = config.envs.amount)
-  eval_env = make_flow_envs(config, env_name="KS", num_envs = config.run.num_eval_envs)
   
-  # eval_env = dreamerv3.make_ks_env(config)  # mode='eval'
-  # eval_env = embodied.BatchEnv([eval_env], parallel=False)
-
   agent = dreamerv3.Agent(env.obs_space, env.act_space, step, config)
   args = embodied.Config(
       **config.run, logdir=config.logdir,
