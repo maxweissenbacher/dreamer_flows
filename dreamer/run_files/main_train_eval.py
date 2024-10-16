@@ -42,7 +42,6 @@ def main(keyword_args):
 #                           'rssm.deter': 1024, 'rssm.units': 512
 #                           }
 #                          )
-  
   logdir_name = config.logdir_basepath+'/'+\
                 config.logdir_dirname+'/'+\
                 config.logdir_expname  
@@ -61,7 +60,6 @@ def main(keyword_args):
   print("##########################################")
   
   # ############################ Creating logger ##############################
-  
   step = embodied.Counter()
   logger = embodied.Logger(step, [
       embodied.logger.TerminalOutput(),
@@ -122,9 +120,6 @@ def gradcontrol(config):
         grad_heads.append('cont')
     return grad_heads
     
-        
-    
-  
 if __name__ == '__main__':
   keyword_args = parse_model_size()   
   main(keyword_args)

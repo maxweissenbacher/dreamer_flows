@@ -32,7 +32,6 @@ def resume_env(plot=False,  # To plot results (Field, controls, lift, drag, rec 
 
     # ---------------------------------------------------------------------------------
 
-  
     dt = 0.004
     single_input = False
     single_output = False

@@ -36,7 +36,6 @@ class Worker:
   def close(self):
     self.impl.close()
 
-
 class BlockingWorker:
 
   def __init__(self, fn):
@@ -53,7 +52,6 @@ class BlockingWorker:
 
   def close(self):
     pass
-
 
 class ThreadWorker:
 

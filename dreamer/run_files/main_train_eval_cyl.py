@@ -10,7 +10,6 @@ import wandb
 
 import os
 
-
 def main(keyword_args):
 
   ############################Load Config##############################
@@ -18,7 +17,7 @@ def main(keyword_args):
 
   # See configs.yaml for all options.
   config = embodied.Config(dreamerv3.configs['defaults'])
-  config = config.update(dreamerv3.configs['large'])
+  config = config.update(dreamerv3.configs['medium'])
   config = config.update({
   # 'rssm.deter': 128,
   # #   '.*\.cnn_depth': 32
@@ -31,6 +30,7 @@ def main(keyword_args):
   'decoder.cnn_keys': '$^',   
   'model_opt.lr': 1e-5,
   'wrapper.length': 0,
+  'run.log_specificenv_data': "avg_drag, avg_lift, avg_area",
   })
 
   config = embodied.Flags(config).parse()
@@ -96,6 +96,7 @@ def main(keyword_args):
   
   
   #make replay
+  print("create replay")
   replay = embodied.replay.Uniform(
                 config.batch_length, config.replay_size, logdir / 'replay')
   # eval_replay = make_replay(config, logdir / 'eval_replay', is_eval=True)
@@ -104,18 +105,23 @@ def main(keyword_args):
   #make env
   # env = make_ks_env(config)
   from make_flow_envs import make_flow_envs, make_cyl_env
-  env = make_flow_envs(config, env_name="CYL", num_envs = config.envs.amount)
-  eval_env = make_cyl_env(config, n_env=0, 
-                          sim_log_name = config.logdir_dirname+"/"+\
-                                         config.logdir_expname, mode = "eval")  # mode='eval'
-  eval_env = embodied.BatchEnv([eval_env], parallel=False)
+  print("env")
+  env = make_flow_envs(config, env_name="CYL", num_envs = config.envs.amount, mode = "train")
+#   eval_env = make_cyl_env(config, n_env=0, 
+#                           sim_log_name = config.logdir_dirname+"/"+\
+#                                          config.logdir_expname, mode = "eval")  # mode='eval'
+#   eval_env = embodied.BatchEnv([eval_env], parallel=True)
+  eval_env = make_flow_envs(config, env_name="CYL", num_envs = config.run.num_eval_envs, mode = "eval")
 
+  print("creating agent")
   agent = dreamerv3.Agent(env.obs_space, env.act_space, step, config)
+  print("creating args")
   args  = embodied.Config(
       **config.run, logdir=config.logdir,
       batch_steps=config.batch_size * config.batch_length)
 
   ########################### Run Training or eval ##############################
+  print("train_eval_rollout_noevalreplay")
   embodied.run.train_eval_rollout_noevalreplay(
           agent, env, eval_env, replay, logger, args)
 

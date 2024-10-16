@@ -1,5 +1,5 @@
 import time
-
+import numpy as np
 
 class Every:
 
@@ -37,6 +37,34 @@ class Ratio:
     if self._prev is None:
       self._prev = step
       return 1
+    repeats = int((step - self._prev) * self._ratio)
+    self._prev += repeats / self._ratio
+    return repeats
+
+#added by Priyam
+class Variable_Ratio:
+
+  def __init__(self, ratio_high = 0.5, ratio_low = 0.5, k=1):
+    # assert ratio >= 0, ratio
+    self.ratio_high = ratio_high
+    self.ratio_low  = ratio_low
+    self.k = k
+    self._ratio = ratio_high
+    self._prev = None
+
+  def set_ratio(self, step):
+    ratio = self.ratio_low + (self.ratio_high-self.ratio_low)*np.exp(-self.k*step)
+    self._ratio = ratio
+        
+  def __call__(self, step):
+    step = int(step)
+    if self._ratio == 0:
+      return 0
+    if self._prev is None:
+      self._prev = step
+      return 1
+    self.set_ratio(step)
+    # print("train_ratio: ", self._ratio)
     repeats = int((step - self._prev) * self._ratio)
     self._prev += repeats / self._ratio
     return repeats

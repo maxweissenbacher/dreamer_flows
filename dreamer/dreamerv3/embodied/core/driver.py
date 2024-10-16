@@ -66,7 +66,7 @@ class Driver:
       for i, first in enumerate(obs['is_first']):
         if first:
           self._eps[i].clear()
-          
+           
     #      
     for i in range(len(self._env)):
       trn = {k: v[i] for k, v in trns.items()}
@@ -88,9 +88,6 @@ class Driver:
     while len(value.shape) < dims:
       value = value[..., None]
     return value
-  
-  
-  
   
   def _eval_step(self, policy, step, episode):
     #added by Priyam

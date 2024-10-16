@@ -18,7 +18,7 @@ from embodied import wrappers
 from embodied.envs import from_gym
 import numpy as np
 
-def make_ks_env(config, n_env = 0, sim_log_name = "KS"):
+def make_ks_env(config, n_env = 0, sim_log_name = "KS", mode = None):
   import gym
   from gym.wrappers.time_limit import TimeLimit
   from ks.KS_environment import KSenv
@@ -74,7 +74,7 @@ def make_cyl_env(config, n_env = 0, sim_log_name = "Test_cylinder", mode='train'
   return env
 
  
-def make_flow_envs(config, env_name = "KS", num_envs = 1):
+def make_flow_envs(config, env_name = "KS", num_envs = 1, mode = None):
   
   assert env_name == "KS" or env_name == "CYL",\
           "Env name should be KS or CYL"
@@ -85,7 +85,8 @@ def make_flow_envs(config, env_name = "KS", num_envs = 1):
     print(f"in loop env {index}")
     make_env = make_cyl_env if env_name == "CYL" else make_ks_env
     ctor = lambda index=index: make_env(config, n_env = index, 
-                            sim_log_name= config.logdir_dirname+"/"+config.logdir_expname)
+                            sim_log_name= config.logdir_dirname+"/"+config.logdir_expname,
+                            mode = mode)
     if config.envs.parallel != 'none':
       ctor = bind(embodied.Parallel, ctor, config.envs.parallel)
     if config.envs.restart:

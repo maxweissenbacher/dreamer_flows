@@ -7,7 +7,9 @@ import numpy as np
 
 def train_eval_rollout_noevalreplay(
     agent, train_env, eval_env, train_replay, logger, args):
-
+  
+  print("inside train_eval_rollout_noevalreplay")
+  
   logdir = embodied.Path(args.logdir)
   should_expl = embodied.when.Until(args.expl_until)
   should_train = embodied.when.Ratio(args.train_ratio / args.batch_steps)
@@ -94,18 +96,7 @@ def train_eval_rollout_noevalreplay(
       agent.sync()
     if should_log(step):
       logger.add(metrics.result())
-      logger.add(agent.report(batch[0]), prefix='report')
-      
-      #for plotting specific values from the env
-      # print("logging specific values")
-      # if args.log_specificenv_data !='':
-      #   actual_train_env = train_env.get_actual_env()
-      #   se_keys = args.log_specificenv_data.split(",")
-      #   for key in se_keys:
-      #     key = key.strip()
-      #     avg_key_val = np.mean(np.array([getattr(actual_train_env[i], key) \
-      #                                     for i in range(len(actual_train_env))]))
-      #     logger.add({key: avg_key_val}, prefix='train')  
+      logger.add(agent.report(batch[0]), prefix='report')  
 
       logger.add(train_replay.stats, prefix='replay')
       # logger.add(eval_replay.stats, prefix='eval_replay')
@@ -181,10 +172,19 @@ def train_eval_rollout_noevalreplay(
           logger.add({f'last_reward_rollout{i}': eval_eps_rewards[i,-1]}, prefix='rollout_eval_episode')
           logger.add({f'mean_reward_rollout{i}': np.mean(eval_eps_rewards[i,:])}, prefix='rollout_eval_episode')
 
-      # eval_eps_reward = np.array(metrics.get_key("rollout_eval_episode/reward"))
-      # mean_eval_eps_reward = np.mean(eval_eps_reward)
-      # last_eval_eps_reward = eval_eps_reward[-1]
-      # logger.add({'mean_reward': mean_eval_eps_reward, 'last_reward': last_eval_eps_reward}, prefix='rollout_eval_episode')
+      # #for calculating specific data fromt the env
+      # if args.log_specificenv_data !='':
+      #   actual_eval_env = eval_env.get_actual_env()
+      #   se_keys = args.log_specificenv_data.split(",")
+        
+      #   for key in se_keys:
+      #     key = key.strip()
+      #     avg_key_val = np.mean(np.array([getattr(actual_eval_env[i], key) \
+      #                                     for i in range(len(actual_eval_env))]))
+      #     logger.add({key: avg_key_val}, prefix='rollout_eval_episode')
+      #     # for i in range(len(actual_eval_env)):
+      #     #   key_i = key+f"_{i}"
+      #     #   logger.add({key_i: getattr(actual_eval_env[i], key)}, prefix='rollout_eval_episode')
     
     driver_train(policy_train, steps=100)
     if should_save(step):

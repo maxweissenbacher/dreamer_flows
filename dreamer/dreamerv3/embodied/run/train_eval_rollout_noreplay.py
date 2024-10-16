@@ -109,14 +109,14 @@ def train_eval_rollout(
   driver_train.on_step(train_step)
 
   checkpoint = embodied.Checkpoint(logdir / 'checkpoint.ckpt')
-  checkpoint.step = step
+  checkpoint.step  = step
   checkpoint.agent = agent
   checkpoint.train_replay = train_replay
-  checkpoint.eval_replay = eval_replay
+  checkpoint.eval_replay  = eval_replay
   if args.from_checkpoint:
     checkpoint.load(args.from_checkpoint)
   checkpoint.load_or_save()
-  should_save(step)  # Register that we jused saved.
+  should_save(step)  # Register that we just saved.
 
   print('Start training loop.')
   policy_train = lambda *args: agent.policy(
@@ -129,7 +129,6 @@ def train_eval_rollout(
       print('Starting evaluation at step', int(step))
       driver_eval.reset()
       # driver_eval(policy_eval, episodes=max(len(eval_env), args.eval_eps))
-      
       #unrolling
       eval_eps_index = 0
 

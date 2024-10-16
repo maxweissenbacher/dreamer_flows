@@ -87,6 +87,38 @@ class Checkpoint:
       age = time.time() - data['_timestamp']
       print(f'Loaded checkpoint from {age:.0f} seconds ago.')
 
+  def load_onlymodel(self, filename=None, keys=None):
+    #added by priyam
+    assert self._filename or filename
+    filename = path.Path(filename or self._filename)
+    self._log and print(f'Loading checkpoint: {filename}')
+    data = basics.unpack(filename.read('rb'))
+    
+    #remove actor and critic keys
+    model_data = {}
+    for key, value in data["agent"].items():
+        act_flag = 'actor' not in key.split("/") and 'actor_opt' not in key.split("/")
+        crit_flag = 'critic' not in key.split("/") and 'critic_opt' not in key.split("/")
+        ac_flag = "ac" not in key.split("/")
+        if act_flag and crit_flag and ac_flag:
+            model_data[key] = value
+            
+    data["agent"] = model_data
+    keys = tuple(data.keys() if keys is None else keys)
+    for key in keys:
+      if key.startswith('_'):
+        continue
+      try:
+        print("key: ", key)
+        self._values[key].load(data[key])
+        print("agent everything: ", dir(self._values["agent"]["agent/task_behavior/ac/actor/dist_out/out/bias"]))
+      except Exception:
+        print(f'Error loading {key} from checkpoint.')
+        raise
+    if self._log:
+      age = time.time() - data['_timestamp']
+      print(f'Loaded checkpoint from {age:.0f} seconds ago.')
+      
   def load_or_save(self):
     if self.exists():
       self.load()

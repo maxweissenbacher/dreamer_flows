@@ -89,6 +89,16 @@ class Agent(nj.Module):
     outs = {}
     return outs, state, metrics
 
+  def train_wm(self, data, state):
+    #just train world model
+    self.config.jax.jit and print('Tracing train_worldmodel function.')
+    metrics = {}
+    data = self.preprocess(data)
+    state, wm_outs, mets = self.wm.train(data, state)
+    metrics.update(mets)
+    outs = {}
+    return outs, state, metrics
+  
   def report(self, data):
     self.config.jax.jit and print('Tracing report function.')
     data = self.preprocess(data)

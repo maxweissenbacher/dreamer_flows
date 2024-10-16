@@ -47,6 +47,11 @@ defaults:
     
     eval_samples: 1
     train_ratio: 64
+    use_variable_ratio: False
+    train_ratio_high: 100000      #added by Priyam set high low to be equal to have fixed train_ratio
+    train_ratio_low: 1024      #added by Priyam
+    train_ratio_k: 0.005        #added by Priyam
+    train_wm: True              #added by Priyam to just train the world model
     train_fill: 0
     eval_fill: 0
     log_zeros: False
@@ -55,8 +60,9 @@ defaults:
     log_keys_sum: '^$'
     log_keys_max: '^$'
     log_keys_eval: '(lift, drag)'
-    log_specificenv_data: 'avg_drag, avg_lift, avg_area'   #only for cylinder flow for now
+    log_specificenv_data: ''   #only for cylinder flow for now
     from_checkpoint: ''
+    load_onlymodel: False
     sync_every: 10
     # actor_addr: 'tcp://127.0.0.1:5551'
     actor_addr: 'ipc:///tmp/5551'

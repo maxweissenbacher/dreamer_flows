@@ -7,10 +7,15 @@ def train_eval_rollout(
     agent, train_env, eval_env, train_replay, eval_replay, logger, args):
 
   logdir = embodied.Path(args.logdir)
-  should_expl = embodied.when.Until(args.expl_until)
-  should_train = embodied.when.Ratio(args.train_ratio / args.batch_steps)
-  should_log = embodied.when.Every(args.log_every)
-  should_save = embodied.when.Clock(args.save_every)
+  should_expl  = embodied.when.Until(args.expl_until)
+  if not args.use_variable_ratio:
+    should_train = embodied.when.Ratio(args.train_ratio / args.batch_steps)
+  else:
+    should_train = embodied.when.Variable_Ratio(ratio_high = args.train_ratio_high / args.batch_steps, 
+                                                ratio_low = args.train_ratio_low / args.batch_steps,
+                                                k = args.train_ratio_k)
+  should_log   = embodied.when.Every(args.log_every)
+  should_save  = embodied.when.Clock(args.save_every)
   
   should_eval = embodied.when.Every(args.eval_every, args.eval_initial)
   should_sync = embodied.when.Every(args.sync_every)
@@ -109,16 +114,57 @@ def train_eval_rollout(
       logger.add(eval_replay.stats, prefix='eval_replay')
       logger.add(timer.stats(), prefix='timer')
       logger.write(fps=True)
-      
-  driver_train.on_step(train_step)
+  
+  def train_step_wm(tran, worker):
+    #trains world model separately multiple times 
+    for _ in range(should_train(step)):
+      with timer.scope('dataset_train'):
+        batch[0] = next(dataset_train)
+      outs, state[0], mets = agent.train_wm(batch[0], state[0])
+      metrics.add(mets, prefix='train')
+      if 'priority' in outs:
+        train_replay.prioritize(outs['key'], outs['priority'])
+      updates.increment()
+    # for _ in range(should_train(step)):
+    #   with timer.scope('dataset_train'):
+    #     batch[0] = next(dataset_train)
+    #   outs, state[0], mets = agent.train(batch[0], state[0])
+    #   metrics.add(mets, prefix='train')
+    #   if 'priority' in outs:
+    #     train_replay.prioritize(outs['key'], outs['priority'])
+    #   updates.increment()
+    if should_sync(updates):
+      agent.sync()
+    if should_log(step):
+      logger.add(metrics.result())
+      logger.add(agent.report(batch[0]), prefix='report')
+      with timer.scope('dataset_eval'):
+        eval_batch = next(dataset_eval)
+      logger.add(agent.report(eval_batch), prefix='eval')
+      logger.add(train_replay.stats, prefix='replay')
+      logger.add(eval_replay.stats, prefix='eval_replay')
+      logger.add(timer.stats(), prefix='timer')
+      logger.write(fps=True)
+  
+  if args.train_wm:
+    driver_train.on_step(train_step_wm)
+  else:
+    driver_train.on_step(train_step)
 
   checkpoint = embodied.Checkpoint(logdir / 'checkpoint.ckpt')
-  checkpoint.step = step
+  checkpoint.step  = step
   checkpoint.agent = agent
   checkpoint.train_replay = train_replay
   checkpoint.eval_replay = eval_replay
   if args.from_checkpoint:
-    checkpoint.load(args.from_checkpoint)
+    if args.load_onlymodel:
+      checkpoint.load_onlymodel(args.from_checkpoint)
+      step.load(0)
+    else:
+      checkpoint.load(args.from_checkpoint)
+
+    #saving checkpoint for the new model
+    checkpoint.save()
   else:
     checkpoint.load_or_save()
   should_save(step)  # Register that we jused saved.
@@ -177,26 +223,36 @@ def train_eval_rollout(
       for i in range(eval_eps_rewards.shape[0]):
           logger.add({f'last_reward_rollout{i}': eval_eps_rewards[i,-1]}, prefix='rollout_eval_episode')
           logger.add({f'mean_reward_rollout{i}': np.mean(eval_eps_rewards[i,:])}, prefix='rollout_eval_episode')
+    
 
-      # eval_eps_reward = np.array(metrics.get_key("rollout_eval_episode/reward"))
-      # mean_eval_eps_reward = np.mean(eval_eps_reward)
-      # last_eval_eps_reward = eval_eps_reward[-1]
-      # logger.add({'mean_reward': mean_eval_eps_reward, 'last_reward': last_eval_eps_reward}, prefix='rollout_eval_episode')
+      #for calculating specific data from the env
+      if args.log_specificenv_data !='':
+        actual_eval_env = eval_env.get_actual_env()
+        se_keys = args.log_specificenv_data.split(",")
+        
+        for key in se_keys:
+          key = key.strip()
+          avg_key_val = np.mean(np.array([getattr(actual_eval_env[i], key) \
+                                          for i in range(len(actual_eval_env))]))
+          logger.add({key: avg_key_val}, prefix='rollout_eval_episode')
+          # for i in range(len(actual_eval_env)):
+          #   key_i = key+f"_{i}"
+          #   logger.add({key_i: getattr(actual_eval_env[i], key)}, prefix='rollout_eval_episode')
     
     driver_train(policy_train, steps=100)
     if should_save(step):
       checkpoint.save()
 
-    """
-    if int(step) % 1e9 == 1e5:
-      print(f"\n\n\n\n Checkpointing extra checkpoint now \n\n\n\n")
-      checkpoint_2 = embodied.Checkpoint(logdir / f"step_{int(step)}" / 'checkpoint.ckpt')
-      checkpoint_2.step = step
-      checkpoint_2.agent = agent
-      checkpoint_2.train_replay = train_replay
-      checkpoint_2.eval_replay = eval_replay
-      checkpoint_2.save()
-    """
+    # """
+    # if int(step) % 1e9 == 1e5:
+    #   print(f"\n\n\n\n Checkpointing extra checkpoint now \n\n\n\n")
+    #   checkpoint_2 = embodied.Checkpoint(logdir / f"step_{int(step)}" / 'checkpoint.ckpt')
+    #   checkpoint_2.step = step
+    #   checkpoint_2.agent = agent
+    #   checkpoint_2.train_replay = train_replay
+    #   checkpoint_2.eval_replay = eval_replay
+    #   checkpoint_2.save()
+    # """
 
   logger.write()
   

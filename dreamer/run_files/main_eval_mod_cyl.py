@@ -21,41 +21,33 @@ def main(keyword_args):
   # #   '.*\.cnn_depth': 32
   # '.*\.units': keyword_args["units"],
   # '.*\.layers': keyword_args["layers"],
-  'run.steps': 2e5,
   'encoder.mlp_keys': 'vector',
   'decoder.mlp_keys': 'vector',    
   'encoder.cnn_keys': '$^',
   'decoder.cnn_keys': '$^',   
-  'model_opt.lr': 1e-5,
+  'model_opt.lr': 1e-4,
   'wrapper.length': 0,
-  'run.log_specific_data': "avg_drag, avg_lift, avg_area",
   })
 
   config = embodied.Flags(config).parse()
   config = config.update({'grad_heads': gradcontrol(config)})
   print("############# config gradhead: ", config.grad_heads)
-  
-  #only for generalizability test
-#   config = config.update({'actor.layers': 2, 'actor.units': 32,
-#                           'critic.layers': 2, 'critic.units': 32,
-#                           'encoder.mlp_layers': 3, 'encoder.mlp_units': 512,
-#                           'decoder.mlp_layers': 3, 'decoder.mlp_units': 512,
-#                           'rssm.deter': 1024, 'rssm.units': 512
-#                           }
-#                          )
-  
+  print("############  "+ config.logdir_eval+"  ###################")
   logdir_name = config.logdir_basepath+'/'+\
                 config.logdir_dirname+'/'+\
                 config.logdir_expname  
-                
-  config = config.update({'logdir': logdir_name})
+  config = config.update({'logdir': logdir_name, 
+                          'logdir_eval': logdir_name+'_Eval'+f"nu{config.KS.nu}_"+config.logdir_info,
+                          'run.from_checkpoint': logdir_name + "/checkpoint.ckpt"
+                          })
   logdir = embodied.Path(config.logdir)
-  logdir.mkdirs()
+  logdir_eval = embodied.Path(config.logdir_eval)
+  logdir_eval.mkdirs()
   
   # import os.path
   # if os.path.isfile(config.logdir+"/config.yaml"):
-     
-  config.save(config.logdir+"/config.yaml")
+
+  config.save(config.logdir_eval+"/config.yaml")
   print("##########################################")
   print('LOGDIR', config.logdir)
   print("Number of Envs: ", config.envs.amount)
@@ -66,46 +58,37 @@ def main(keyword_args):
   step = embodied.Counter()
   logger = embodied.Logger(step, [
       embodied.logger.TerminalOutput(),
-      embodied.logger.JSONLOutput(logdir, 'metrics.jsonl'),
-      embodied.logger.TensorBoardOutput(logdir),
+      embodied.logger.JSONLOutput(logdir_eval, 'metrics.jsonl'),
+      embodied.logger.TensorBoardOutput(logdir_eval),
       embodied.logger.WandBOutput(
             pattern="$",
-            logdir=logdir,
+            logdir=logdir_eval,
             config=config,
         ),
       # embodied.logger.MLFlowOutput(logdir.name),
   ])
   
+  
   #make replay
-  print("making replay")
-  replay = embodied.replay.Uniform(
-                config.batch_length, config.replay_size, logdir / 'replay')
-  # eval_replay = make_replay(config, logdir / 'eval_replay', is_eval=True)
-  print("making eval replay")
+#   train_replay = embodied.replay.Uniform(
+#                 config.batch_length, config.replay_size, logdir / 'eval_replay')
   eval_replay = embodied.replay.Uniform(
                 config.batch_length, config.replay_size, logdir / 'eval_replay')
   
+  #make env
   from make_flow_envs import make_flow_envs, make_cyl_env
-  print("making train env")
-  env = make_flow_envs(config, env_name="CYL", num_envs = config.envs.amount)
-  print("make eval_env")
   eval_env = make_flow_envs(config, env_name="CYL", num_envs = config.run.num_eval_envs, mode = "eval")
 
-  #make env
-  print("making agent")
-  agent = dreamerv3.Agent(env.obs_space, env.act_space, step, config)
-  print("making arg")
+  agent = dreamerv3.Agent(eval_env.obs_space, eval_env.act_space, step, config)
   args = embodied.Config(
-      **config.run, logdir=config.logdir,
+      **config.run, logdir=config.logdir, logdir_eval = config.logdir_eval,
       batch_steps=config.batch_size * config.batch_length)
 
+    
   ########################### Run Training or eval ##############################
-  print("going into train_eval_rollout")
-  embodied.run.train_eval_rollout(
-          agent, env, eval_env, replay, eval_replay, logger, args)
+  embodied.run.eval_rollout(
+          agent, eval_env, eval_replay, logger, args)
 
-  #eval_only
-  # embodied.run.eval_only(agent, env, logger, args)
 
 def parse_model_size():
     #for parsing model size from terminal
@@ -127,8 +110,9 @@ def gradcontrol(config):
     return grad_heads
     
         
-    
-  
+
 if __name__ == '__main__':
+  
+  
   keyword_args = parse_model_size()   
   main(keyword_args)

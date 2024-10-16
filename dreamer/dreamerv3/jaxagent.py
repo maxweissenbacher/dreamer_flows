@@ -83,7 +83,27 @@ class JAXAgent(embodied.Agent):
       for name, count in jaxutils.Optimizer.PARAM_COUNTS.items():
         mets[f'params_{name}'] = float(count)
     return outs, state, mets
-
+  
+  def train_wm(self, data, state=None):
+    #Just training the world model
+    rng = self._next_rngs(self.train_devices)
+    if state is None:
+      state, self.varibs = self._init_train(self.varibs, rng, data['is_first'])
+    (outs, state, mets), self.varibs = self._train_wm(
+        self.varibs, rng, data, state)
+    outs = self._convert_outs(outs, self.train_devices)
+    self._updates.increment()
+    if self._should_metrics(self._updates):
+      mets = self._convert_mets(mets, self.train_devices)
+    else:
+      mets = {}
+    if self._once:
+      self._once = False
+      assert jaxutils.Optimizer.PARAM_COUNTS
+      for name, count in jaxutils.Optimizer.PARAM_COUNTS.items():
+        mets[f'params_{name}'] = float(count)
+    return outs, state, mets
+  
   def report(self, data):
     rng = self._next_rngs(self.train_devices)
     mets, _ = self._report(self.varibs, rng, data)
@@ -156,6 +176,7 @@ class JAXAgent(embodied.Agent):
     self._init_train = nj.pure(lambda x: self.agent.train_initial(len(x)))
     self._policy = nj.pure(self.agent.policy)
     self._train = nj.pure(self.agent.train)
+    self._train_wm = nj.pure(self.agent.train_wm)
     self._report = nj.pure(self.agent.report)
     if len(self.train_devices) == 1:
       kw = dict(device=self.train_devices[0])
